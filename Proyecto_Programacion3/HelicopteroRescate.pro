@@ -8,14 +8,8 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    helicoptero.cpp \
-    obstaculo.cpp \
-    obstaculoestatico.cpp \
-    obstaculomovil.cpp
+    helicoptero.cpp
 
 HEADERS += \
     mainwindow.h \
-    helicoptero.h \
-    obstaculo.h \
-    obstaculoestatico.h \
-    obstaculomovil.h
+    helicoptero.h

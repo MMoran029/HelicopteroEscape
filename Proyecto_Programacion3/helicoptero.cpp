@@ -2,10 +2,11 @@
 #include <algorithm>
 
 Helicoptero::Helicoptero()
-    : velocidadY(0),
+    : velocidadY(0), velocidadX(0),
     aceleracionSubida(0.6), aceleracionBajada(0.5),
+    aceleracionHorizontal(0.5), frenoHorizontal(0.3),
     gravedad(0.35),
-    subiendo(false), bajando(false),
+    subiendo(false), bajando(false), izquierda(false), derecha(false),
     angulo(0)
 {
 }
@@ -46,7 +47,17 @@ void Helicoptero::setBajando(bool valor)
     bajando = valor;
 }
 
-void Helicoptero::actualizarFisica(int altoEscena)
+void Helicoptero::setIzquierda(bool valor)
+{
+    izquierda = valor;
+}
+
+void Helicoptero::setDerecha(bool valor)
+{
+    derecha = valor;
+}
+
+void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
 {
     if (subiendo) {
         velocidadY -= aceleracionSubida;
@@ -58,7 +69,22 @@ void Helicoptero::actualizarFisica(int altoEscena)
 
     velocidadY = std::max(-10.0, std::min(velocidadY, 10.0));
 
+    if (izquierda) {
+        velocidadX -= aceleracionHorizontal;
+    } else if (derecha) {
+        velocidadX += aceleracionHorizontal;
+    } else {
+        if (velocidadX > 0) {
+            velocidadX = std::max(0.0, velocidadX - frenoHorizontal);
+        } else if (velocidadX < 0) {
+            velocidadX = std::min(0.0, velocidadX + frenoHorizontal);
+        }
+    }
+
+    velocidadX = std::max(-8.0, std::min(velocidadX, 8.0));
+
     qreal nuevaY = y() + velocidadY;
+    qreal nuevaX = x() + velocidadX;
 
     if (nuevaY < 15) {
         nuevaY = 15;
@@ -70,9 +96,17 @@ void Helicoptero::actualizarFisica(int altoEscena)
         velocidadY = 0;
     }
 
-    // La posicion X ya no cambia: el helicoptero se queda fijo horizontalmente
-    // mientras el "avance" lo dan los obstaculos que se desplazan hacia el.
-    setPos(x(), nuevaY);
+    if (nuevaX < 30) {
+        nuevaX = 30;
+        velocidadX = 0;
+    }
+
+    if (nuevaX > anchoEscena - 35) {
+        nuevaX = anchoEscena - 35;
+        velocidadX = 0;
+    }
+
+    setPos(nuevaX, nuevaY);
 
     angulo = std::max(-15.0, std::min(15.0, -velocidadY * 1.5));
     setRotation(angulo);
