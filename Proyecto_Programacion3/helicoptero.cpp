@@ -27,14 +27,6 @@ void Helicoptero::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->setPen(Qt::black);
     painter->drawRoundedRect(-20, -10, 40, 20, 5, 5);
 
-    painter->drawLine(20, 0, 35, -5);
-
-    painter->setPen(QPen(Qt::black, 2));
-    painter->drawLine(-30, -12, 30, -12);
-
-    painter->drawLine(-15, 10, -15, 16);
-    painter->drawLine(15, 10, 15, 16);
-    painter->drawLine(-15, 16, 15, 16);
 }
 
 void Helicoptero::setSubiendo(bool valor)

@@ -1,36 +1,34 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
 #include <QMainWindow>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QTimer>
-#include <QKeyEvent>
-#include "helicoptero.h"
+#include <QStackedWidget>
+#include "menuprincipal.h"
+#include "pantallajuego.h"
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-protected:
-    void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
-
 private slots:
-    void actualizarJuego();
+    void irAJuego();
 
 private:
-    QGraphicsScene *escena;
+    QStackedWidget *stack;
+    MenuPrincipal *menu;
+    PantallaJuego *pantallaJuego;
+
+    /*QGraphicsScene *escena;
     QGraphicsView *vista;
     QTimer *timerJuego;
     Helicoptero *helicoptero;
+los movi a PantallaJuego*/
 
-    static const int ANCHO_ESCENA = 800;
-    static const int ALTO_ESCENA = 500;
+    void configurarMenu();
+    void configurarJuego();
+
+    // RECORDATORIO: cuando exista pantalla de Instrucciones y logica de
+    // Salir, agregar sus propios slots aqui, similares a irAJuego().
 };
-
 #endif // MAINWINDOW_H

@@ -1,0 +1,12 @@
+release/civil.o
+release/crearboton.o
+release/main.o
+release/mainwindow.o
+release/helicoptero.o
+release/menuprincipal.o
+release/pantallajuego.o
+release/qrc_recursos.o
+release/moc_crearboton.o
+release/moc_mainwindow.o
+release/moc_menuprincipal.o
+release/moc_pantallajuego.o
