@@ -6,7 +6,7 @@ using namespace std;
 MenuPrincipal::MenuPrincipal(QWidget *parent) : QWidget(parent){
     fondoMenu.load(":/imagenes/menu_principal.png");
     if(fondoMenu.isNull() == true){
-        cout<<"Error: no se pudo cargar la imagen del menu principal"<<endl;
+        cout<<"[ERROR] no se pudo cargar la imagen del menu principal"<<endl;
     }
     configurarBotones();
 }
@@ -23,9 +23,10 @@ void MenuPrincipal::configurarBotones(){
     botonRanking->resize(200, 50);
     botonInstrucciones->resize(200, 50);
     botonSalir->resize(200, 50);
-
-    // RECORDATORIO: por ahora ningun boton hace algo simplemente el de jugar que abre el prototipo
+    connect(botonMisiones, &QPushButton::clicked, this, &MenuPrincipal::misionesPresionado);
     connect(botonJugar, &QPushButton::clicked, this, &MenuPrincipal::jugarPresionado);
+    connect(botonInstrucciones, &QPushButton::clicked, this, &MenuPrincipal::instruccionesPresionado);
+    connect(botonSalir, &QPushButton::clicked, this, &MenuPrincipal::salirPresionado);
 }
 
 void MenuPrincipal::acomodarBotones(){

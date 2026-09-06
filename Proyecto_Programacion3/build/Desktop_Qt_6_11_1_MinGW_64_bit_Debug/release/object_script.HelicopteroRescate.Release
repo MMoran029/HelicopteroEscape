@@ -4,9 +4,13 @@ release/main.o
 release/mainwindow.o
 release/helicoptero.o
 release/menuprincipal.o
+release/pantallainstrucciones.o
 release/pantallajuego.o
+release/pantallamisiones.o
 release/qrc_recursos.o
 release/moc_crearboton.o
 release/moc_mainwindow.o
 release/moc_menuprincipal.o
+release/moc_pantallainstrucciones.o
 release/moc_pantallajuego.o
+release/moc_pantallamisiones.o

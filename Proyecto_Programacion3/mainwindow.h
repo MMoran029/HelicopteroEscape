@@ -4,6 +4,8 @@
 #include <QStackedWidget>
 #include "menuprincipal.h"
 #include "pantallajuego.h"
+#include "pantallainstrucciones.h"
+#include "pantallamisiones.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -13,22 +15,23 @@ public:
 
 private slots:
     void irAJuego();
-
+    void irAInstrucciones();
+    void irAMenu();
+    void salirDelJuego();
+    void irAMisiones();
+    void mision1Elegida();
+    void mision2Elegida();
+    void mision3Elegida();
 private:
     QStackedWidget *stack;
     MenuPrincipal *menu;
     PantallaJuego *pantallaJuego;
-
-    /*QGraphicsScene *escena;
-    QGraphicsView *vista;
-    QTimer *timerJuego;
-    Helicoptero *helicoptero;
-los movi a PantallaJuego*/
-
+    PantallaInstrucciones *pantallaInstrucciones;
+    PantallaMisiones *pantallaMisiones;
+    void configurarMisiones();
     void configurarMenu();
     void configurarJuego();
+    void configurarInstrucciones();
 
-    // RECORDATORIO: cuando exista pantalla de Instrucciones y logica de
-    // Salir, agregar sus propios slots aqui, similares a irAJuego().
 };
 #endif // MAINWINDOW_H

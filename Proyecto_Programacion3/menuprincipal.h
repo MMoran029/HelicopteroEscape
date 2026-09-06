@@ -17,7 +17,9 @@ protected:
 
 signals:
     void jugarPresionado();
-
+    void instruccionesPresionado();
+    void salirPresionado();
+    void misionesPresionado();
 private:
     QPixmap fondoMenu;
     CrearBoton *botonJugar;
@@ -28,10 +30,5 @@ private:
 
     void configurarBotones();
     void acomodarBotones();
-
-    // RECORDATORIO: conectar botonMisiones, botonRanking,
-    // botonInstrucciones y botonSalir a su funcionalidad real cuando
-    // existan esas pantallas (mision actual, tabla de ranking,
-    // instrucciones, y cierre controlado del programa).
 };
 #endif // MENUPRINCIPAL_H

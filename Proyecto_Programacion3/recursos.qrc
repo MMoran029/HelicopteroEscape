@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/imagenes">
         <file alias="menu_principal.png">imagenes/menu_principal.png</file>
+        <file>Imagenes/instrucciones.png</file>
+        <file>Imagenes/pantallamisiones.png</file>
     </qresource>
 </RCC>

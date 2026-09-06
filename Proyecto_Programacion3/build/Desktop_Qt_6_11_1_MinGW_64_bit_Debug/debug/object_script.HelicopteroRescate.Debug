@@ -4,9 +4,13 @@ debug/main.o
 debug/mainwindow.o
 debug/helicoptero.o
 debug/menuprincipal.o
+debug/pantallainstrucciones.o
 debug/pantallajuego.o
+debug/pantallamisiones.o
 debug/qrc_recursos.o
 debug/moc_crearboton.o
 debug/moc_mainwindow.o
 debug/moc_menuprincipal.o
+debug/moc_pantallainstrucciones.o
 debug/moc_pantallajuego.o
+debug/moc_pantallamisiones.o

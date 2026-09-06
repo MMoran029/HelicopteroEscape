@@ -1,12 +1,12 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'menuprincipal.h'
+** Meta object code from reading C++ file 'pantallamisiones.h'
 **
 ** Created by: The Qt Meta Object Compiler version 69 (Qt 6.11.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../menuprincipal.h"
+#include "../../../pantallamisiones.h"
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -16,7 +16,7 @@
 
 #include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'menuprincipal.h' doesn't include <QObject>."
+#error "The header file 'pantallamisiones.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 69
 #error "This file was generated using the moc from 6.11.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -31,86 +31,86 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 QT_WARNING_DISABLE_GCC("-Wuseless-cast")
 namespace {
-struct qt_meta_tag_ZN13MenuPrincipalE_t {};
+struct qt_meta_tag_ZN16PantallaMisionesE_t {};
 } // unnamed namespace
 
-template <> constexpr inline auto MenuPrincipal::qt_create_metaobjectdata<qt_meta_tag_ZN13MenuPrincipalE_t>()
+template <> constexpr inline auto PantallaMisiones::qt_create_metaobjectdata<qt_meta_tag_ZN16PantallaMisionesE_t>()
 {
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
-        "MenuPrincipal",
-        "jugarPresionado",
+        "PantallaMisiones",
+        "mision1Presionado",
         "",
-        "instruccionesPresionado",
-        "salirPresionado",
-        "misionesPresionado"
+        "mision2Presionado",
+        "mision3Presionado",
+        "volverPresionado"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Signal 'jugarPresionado'
+        // Signal 'mision1Presionado'
         QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'instruccionesPresionado'
+        // Signal 'mision2Presionado'
         QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'salirPresionado'
+        // Signal 'mision3Presionado'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'misionesPresionado'
+        // Signal 'volverPresionado'
         QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
     QtMocHelpers::UintData qt_enums {
     };
-    return QtMocHelpers::metaObjectData<MenuPrincipal, qt_meta_tag_ZN13MenuPrincipalE_t>(QMC::MetaObjectFlag{}, qt_stringData,
+    return QtMocHelpers::metaObjectData<PantallaMisiones, qt_meta_tag_ZN16PantallaMisionesE_t>(QMC::MetaObjectFlag{}, qt_stringData,
             qt_methods, qt_properties, qt_enums);
 }
-Q_CONSTINIT const QMetaObject MenuPrincipal::staticMetaObject = { {
+Q_CONSTINIT const QMetaObject PantallaMisiones::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13MenuPrincipalE_t>.stringdata,
-    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13MenuPrincipalE_t>.data,
+    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN16PantallaMisionesE_t>.stringdata,
+    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN16PantallaMisionesE_t>.data,
     qt_static_metacall,
     nullptr,
-    qt_staticMetaObjectRelocatingContent<qt_meta_tag_ZN13MenuPrincipalE_t>.metaTypes,
+    qt_staticMetaObjectRelocatingContent<qt_meta_tag_ZN16PantallaMisionesE_t>.metaTypes,
     nullptr
 } };
 
-void MenuPrincipal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void PantallaMisiones::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    auto *_t = static_cast<MenuPrincipal *>(_o);
+    auto *_t = static_cast<PantallaMisiones *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->jugarPresionado(); break;
-        case 1: _t->instruccionesPresionado(); break;
-        case 2: _t->salirPresionado(); break;
-        case 3: _t->misionesPresionado(); break;
+        case 0: _t->mision1Presionado(); break;
+        case 1: _t->mision2Presionado(); break;
+        case 2: _t->mision3Presionado(); break;
+        case 3: _t->volverPresionado(); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
-        if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::jugarPresionado, 0))
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::mision1Presionado, 0))
             return;
-        if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::instruccionesPresionado, 1))
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::mision2Presionado, 1))
             return;
-        if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::salirPresionado, 2))
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::mision3Presionado, 2))
             return;
-        if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::misionesPresionado, 3))
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::volverPresionado, 3))
             return;
     }
 }
 
-const QMetaObject *MenuPrincipal::metaObject() const
+const QMetaObject *PantallaMisiones::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *MenuPrincipal::qt_metacast(const char *_clname)
+void *PantallaMisiones::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13MenuPrincipalE_t>.strings))
+    if (!strcmp(_clname, qt_staticMetaObjectStaticContent<qt_meta_tag_ZN16PantallaMisionesE_t>.strings))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
-int MenuPrincipal::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int PantallaMisiones::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -129,25 +129,25 @@ int MenuPrincipal::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void MenuPrincipal::jugarPresionado()
+void PantallaMisiones::mision1Presionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
 }
 
 // SIGNAL 1
-void MenuPrincipal::instruccionesPresionado()
+void PantallaMisiones::mision2Presionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 
 // SIGNAL 2
-void MenuPrincipal::salirPresionado()
+void PantallaMisiones::mision3Presionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
 }
 
 // SIGNAL 3
-void MenuPrincipal::misionesPresionado()
+void PantallaMisiones::volverPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
 }
