@@ -3,11 +3,11 @@
 
 Helicoptero::Helicoptero()
     : velocidadY(0), velocidadX(0),
-    aceleracionSubida(0.6), aceleracionBajada(0.5),
-    aceleracionHorizontal(0.5), frenoHorizontal(0.3),
-    gravedad(0.35),
+    aceleracionSubida(0.30), aceleracionBajada(0.10),
+    aceleracionHorizontal(0.4), frenoHorizontal(0.2),
+    gravedad(0.12),
     subiendo(false), bajando(false), izquierda(false), derecha(false),
-    angulo(0)
+    angulo(0), enSuelo(false)
 {
 }
 
@@ -49,6 +49,12 @@ void Helicoptero::setDerecha(bool valor)
     derecha = valor;
 }
 
+void Helicoptero::aterrizarSobre(qreal nuevaX, qreal nuevaY)
+{
+    setPos(nuevaX, nuevaY);
+    velocidadY = 0; // se detiene la caida en seco, como si tocara una superficie solida
+}
+
 void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
 {
     if (subiendo) {
@@ -59,7 +65,7 @@ void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
         velocidadY += gravedad;
     }
 
-    velocidadY = std::max(-10.0, std::min(velocidadY, 10.0));
+    velocidadY = std::max(-6.0, std::min(velocidadY, 6.0));
 
     if (izquierda) {
         velocidadX -= aceleracionHorizontal;
@@ -78,6 +84,8 @@ void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
     qreal nuevaY = y() + velocidadY;
     qreal nuevaX = x() + velocidadX;
 
+    enSuelo = false;
+
     if (nuevaY < 15) {
         nuevaY = 15;
         velocidadY = 0;
@@ -86,6 +94,7 @@ void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
     if (nuevaY > altoEscena - 15) {
         nuevaY = altoEscena - 15;
         velocidadY = 0;
+        enSuelo = true; // el helicoptero quedo pegado al piso: derrota inmediata
     }
 
     if (nuevaX < 30) {

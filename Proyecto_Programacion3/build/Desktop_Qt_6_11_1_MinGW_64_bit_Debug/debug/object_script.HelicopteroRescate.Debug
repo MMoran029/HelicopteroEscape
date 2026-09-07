@@ -4,6 +4,10 @@ debug/main.o
 debug/mainwindow.o
 debug/helicoptero.o
 debug/menuprincipal.o
+debug/obstaculo.o
+debug/obstaculoestatico.o
+debug/obstaculomovil.o
+debug/panelresultado.o
 debug/pantallainstrucciones.o
 debug/pantallajuego.o
 debug/pantallamisiones.o
@@ -11,6 +15,7 @@ debug/qrc_recursos.o
 debug/moc_crearboton.o
 debug/moc_mainwindow.o
 debug/moc_menuprincipal.o
+debug/moc_panelresultado.o
 debug/moc_pantallainstrucciones.o
 debug/moc_pantallajuego.o
 debug/moc_pantallamisiones.o

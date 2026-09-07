@@ -20,6 +20,16 @@ public:
     double getVelocidadY() const { return velocidadY; }
     double getVelocidadX() const { return velocidadX; }
 
+    // Indica si en el ultimo frame el helicoptero quedo pegado al piso
+    // de la escena. PantallaJuego usa esto para terminar la partida
+    // de inmediato (choque contra el suelo = derrota automatica).
+    bool tocoElSuelo() const { return enSuelo; }
+
+    // Posa el helicoptero exactamente sobre una superficie (por ejemplo
+    // el techo de un edificio), deteniendo su caida en seco. La usa
+    // PantallaJuego cuando detecta un aterrizaje seguro (sin choque).
+    void aterrizarSobre(qreal nuevaX, qreal nuevaY);
+
 private:
     double velocidadY;
     double velocidadX;
@@ -33,6 +43,7 @@ private:
     bool izquierda;
     bool derecha;
     double angulo;
+    bool enSuelo;
 };
 
 #endif // HELICOPTERO_H

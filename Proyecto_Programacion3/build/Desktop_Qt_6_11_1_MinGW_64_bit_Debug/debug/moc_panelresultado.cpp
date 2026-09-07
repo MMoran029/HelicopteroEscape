@@ -1,12 +1,12 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'pantallajuego.h'
+** Meta object code from reading C++ file 'panelresultado.h'
 **
 ** Created by: The Qt Meta Object Compiler version 69 (Qt 6.11.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../pantallajuego.h"
+#include "../../../panelresultado.h"
 #include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
@@ -17,7 +17,7 @@
 
 #include <QtCore/qxptype_traits.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'pantallajuego.h' doesn't include <QObject>."
+#error "The header file 'panelresultado.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 69
 #error "This file was generated using the moc from 6.11.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -32,84 +32,86 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 QT_WARNING_DISABLE_GCC("-Wuseless-cast")
 namespace {
-struct qt_meta_tag_ZN13PantallaJuegoE_t {};
+struct qt_meta_tag_ZN14PanelResultadoE_t {};
 } // unnamed namespace
 
-template <> constexpr inline auto PantallaJuego::qt_create_metaobjectdata<qt_meta_tag_ZN13PantallaJuegoE_t>()
+template <> constexpr inline auto PanelResultado::qt_create_metaobjectdata<qt_meta_tag_ZN14PanelResultadoE_t>()
 {
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
-        "PantallaJuego",
-        "solicitaMenu",
+        "PanelResultado",
+        "reiniciarPresionado",
         "",
-        "solicitaMisiones",
-        "solicitaSiguienteNivel",
-        "actualizarJuego"
+        "menuPresionado",
+        "misionesPresionado",
+        "siguienteNivelPresionado"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Signal 'solicitaMenu'
+        // Signal 'reiniciarPresionado'
         QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'solicitaMisiones'
+        // Signal 'menuPresionado'
         QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'solicitaSiguienteNivel'
+        // Signal 'misionesPresionado'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
-        // Slot 'actualizarJuego'
-        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Signal 'siguienteNivelPresionado'
+        QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
     QtMocHelpers::UintData qt_enums {
     };
-    return QtMocHelpers::metaObjectData<PantallaJuego, qt_meta_tag_ZN13PantallaJuegoE_t>(QMC::MetaObjectFlag{}, qt_stringData,
+    return QtMocHelpers::metaObjectData<PanelResultado, qt_meta_tag_ZN14PanelResultadoE_t>(QMC::MetaObjectFlag{}, qt_stringData,
             qt_methods, qt_properties, qt_enums);
 }
-Q_CONSTINIT const QMetaObject PantallaJuego::staticMetaObject = { {
+Q_CONSTINIT const QMetaObject PanelResultado::staticMetaObject = { {
     QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13PantallaJuegoE_t>.stringdata,
-    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13PantallaJuegoE_t>.data,
+    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN14PanelResultadoE_t>.stringdata,
+    qt_staticMetaObjectStaticContent<qt_meta_tag_ZN14PanelResultadoE_t>.data,
     qt_static_metacall,
     nullptr,
-    qt_staticMetaObjectRelocatingContent<qt_meta_tag_ZN13PantallaJuegoE_t>.metaTypes,
+    qt_staticMetaObjectRelocatingContent<qt_meta_tag_ZN14PanelResultadoE_t>.metaTypes,
     nullptr
 } };
 
-void PantallaJuego::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void PanelResultado::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    auto *_t = static_cast<PantallaJuego *>(_o);
+    auto *_t = static_cast<PanelResultado *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->solicitaMenu(); break;
-        case 1: _t->solicitaMisiones(); break;
-        case 2: _t->solicitaSiguienteNivel(); break;
-        case 3: _t->actualizarJuego(); break;
+        case 0: _t->reiniciarPresionado(); break;
+        case 1: _t->menuPresionado(); break;
+        case 2: _t->misionesPresionado(); break;
+        case 3: _t->siguienteNivelPresionado(); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
-        if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)()>(_a, &PantallaJuego::solicitaMenu, 0))
+        if (QtMocHelpers::indexOfMethod<void (PanelResultado::*)()>(_a, &PanelResultado::reiniciarPresionado, 0))
             return;
-        if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)()>(_a, &PantallaJuego::solicitaMisiones, 1))
+        if (QtMocHelpers::indexOfMethod<void (PanelResultado::*)()>(_a, &PanelResultado::menuPresionado, 1))
             return;
-        if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)()>(_a, &PantallaJuego::solicitaSiguienteNivel, 2))
+        if (QtMocHelpers::indexOfMethod<void (PanelResultado::*)()>(_a, &PanelResultado::misionesPresionado, 2))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (PanelResultado::*)()>(_a, &PanelResultado::siguienteNivelPresionado, 3))
             return;
     }
 }
 
-const QMetaObject *PantallaJuego::metaObject() const
+const QMetaObject *PanelResultado::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *PantallaJuego::qt_metacast(const char *_clname)
+void *PanelResultado::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_staticMetaObjectStaticContent<qt_meta_tag_ZN13PantallaJuegoE_t>.strings))
+    if (!strcmp(_clname, qt_staticMetaObjectStaticContent<qt_meta_tag_ZN14PanelResultadoE_t>.strings))
         return static_cast<void*>(this);
     return QWidget::qt_metacast(_clname);
 }
 
-int PantallaJuego::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int PanelResultado::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -128,20 +130,26 @@ int PantallaJuego::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void PantallaJuego::solicitaMenu()
+void PanelResultado::reiniciarPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
 }
 
 // SIGNAL 1
-void PantallaJuego::solicitaMisiones()
+void PanelResultado::menuPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 
 // SIGNAL 2
-void PantallaJuego::solicitaSiguienteNivel()
+void PanelResultado::misionesPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+}
+
+// SIGNAL 3
+void PanelResultado::siguienteNivelPresionado()
+{
+    QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
 }
 QT_WARNING_POP

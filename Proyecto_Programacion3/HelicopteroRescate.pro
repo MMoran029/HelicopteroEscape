@@ -12,6 +12,10 @@ SOURCES += \
     mainwindow.cpp \
     helicoptero.cpp \
     menuprincipal.cpp \
+    obstaculo.cpp \
+    obstaculoestatico.cpp \
+    obstaculomovil.cpp \
+    panelresultado.cpp \
     pantallainstrucciones.cpp \
     pantallajuego.cpp \
     pantallamisiones.cpp
@@ -22,9 +26,15 @@ HEADERS += \
     mainwindow.h \
     helicoptero.h \
     menuprincipal.h \
+    obstaculo.h \
+    obstaculoestatico.h \
+    obstaculomovil.h \
+    panelresultado.h \
     pantallainstrucciones.h \
     pantallajuego.h \
     pantallamisiones.h
 
 RESOURCES += \
+    recursos.qrc \
+    recursos.qrc \
     recursos.qrc
