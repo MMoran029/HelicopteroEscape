@@ -59,6 +59,7 @@ private:
 
     static const int ANCHO_ESCENA = 800;
     static const int ALTO_ESCENA = 500;
+    static const int ALTURA_SUELO = 42; // alto visual de la franja de piso
 
     // ---- Matriz dinamica de obstaculos: PUNTERO DOBLE (Obstaculo**) ----
     // obstaculos es un puntero a un arreglo de punteros a Obstaculo.
@@ -101,7 +102,7 @@ private:
 
     void generarEdificio();
     void generarEnemigo();
-    void generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio);
+    Civil* generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio);
 
     void agregarObstaculo(Obstaculo *obs);
     void agregarCivil(Civil *civil);

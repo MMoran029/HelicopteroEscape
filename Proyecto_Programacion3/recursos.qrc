@@ -3,5 +3,14 @@
         <file alias="menu_principal.png">imagenes/menu_principal.png</file>
         <file>Imagenes/instrucciones.png</file>
         <file>Imagenes/pantallamisiones.png</file>
+        <file>Imagenes/Edificio_1.png</file>
+        <file>Imagenes/Edificio_2.png</file>
+        <file>Imagenes/Edificio_3.png</file>
+        <file>Imagenes/H_Jugador.png</file>
+        <file>Imagenes/H_Enemigo.png</file>
+        <file>Imagenes/Persona_1.png</file>
+        <file>Imagenes/Persona_2.png</file>
+        <file>Imagenes/Persona_3.png</file>
+        <file>Imagenes/Piso.png</file>
     </qresource>
 </RCC>

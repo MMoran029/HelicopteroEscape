@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QBrush>
 #include <QVBoxLayout>
+#include <QGraphicsPixmapItem>
 #include <cstdlib>
 #include <ctime>
 
@@ -11,8 +12,8 @@ PantallaJuego::PantallaJuego(QWidget *parent) : QWidget(parent),
     vidas(3), civilesRescatados(0), civilesTotalNivel(0), civilesPerdidos(0),
     distanciaRecorrida(0), distanciaMeta(6000), velocidadScroll(1.6),
     estado(EstadoJuego::Jugando), juegoIniciado(false),
-    contadorFramesEdificio(0), intervaloEdificio(110),
-    contadorFramesEnemigo(0), intervaloEnemigo(240)
+    contadorFramesEdificio(0), intervaloEdificio(150),
+    contadorFramesEnemigo(0), intervaloEnemigo(260)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -47,8 +48,19 @@ void PantallaJuego::configurarEscena(){
 
     vista = new QGraphicsView(escena, this);
     vista->setRenderHint(QPainter::Antialiasing);
+    vista->setRenderHint(QPainter::SmoothPixmapTransform);
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    // Franja de piso: decoracion fija (no se mueve con el scroll, igual
+    // que el fondo). Se escala para cubrir exactamente el ancho de la
+    // escena con la altura definida en ALTURA_SUELO.
+    QPixmap pisoOriginal(":/imagenes/Imagenes/Piso.png");
+    QPixmap pisoEscalado = pisoOriginal.scaled(ANCHO_ESCENA, ALTURA_SUELO,
+                                                Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QGraphicsPixmapItem *piso = escena->addPixmap(pisoEscalado);
+    piso->setPos(0, ALTO_ESCENA - ALTURA_SUELO);
+    piso->setZValue(-1);
 
     helicoptero = new Helicoptero();
     helicoptero->setPos(100, ALTO_ESCENA / 2);
@@ -83,24 +95,37 @@ void PantallaJuego::resizeEvent(QResizeEvent *event){
 // Generacion de obstaculos y civiles
 // ---------------------------------------------------------------
 void PantallaJuego::generarEdificio(){
-    qreal alto = 80 + (rand() % 180);      // alto entre 80 y 260
-    qreal ancho = 60 + (rand() % 30);      // ancho entre 60 y 90
-    qreal posX = ANCHO_ESCENA + ancho;     // aparece justo fuera de la vista
-    qreal posY = ALTO_ESCENA - alto / 2;   // apoyado sobre el piso de la escena
+    int variante = 1 + (rand() % 3);       // Edificio_1, Edificio_2 o Edificio_3
 
-    ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, ancho, alto);
+    qreal alto;
+    if (variante == 2) {
+        // Edificio_2 es mas angosto que los otros (imagen alta y
+        // delgada). Un punto medio: ni tan chico que se pierda, ni tan
+        // alto que termine dominando la pantalla.
+        alto = 150 + (rand() % 90); // entre 150 y 240
+    } else {
+        alto = 120 + (rand() % 80);  // entre 120 y 200
+    }
+
+    qreal ancho = ObstaculoEstatico::calcularAncho(alto, variante);
+
+    qreal posX = ANCHO_ESCENA + ancho;                          // aparece justo fuera de la vista
+    qreal posY = (ALTO_ESCENA - ALTURA_SUELO) - alto / 2;       // apoyado sobre la franja de piso
+
+    ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, alto, variante);
     agregarObstaculo(edificio);
 
     // No todos los edificios tienen civiles: 40% de probabilidad.
     if (rand() % 100 < 40) {
         qreal topY = posY - alto / 2; // borde superior (techo) del edificio
-        generarCivilesSobreEdificio(posX, topY);
+        Civil *civil = generarCivilesSobreEdificio(posX, topY);
+        edificio->asociarCivil(civil);
     }
 }
 
 void PantallaJuego::generarEnemigo(){
-    qreal ancho = 50;
-    qreal alto = 30;
+    qreal alto = 30 + (rand() % 13);       // alto entre 30 y 42 (mas pequenos que antes)
+    qreal ancho = ObstaculoMovil::calcularAncho(alto);
     qreal posX = ANCHO_ESCENA + ancho;
     qreal posY = 60 + (rand() % (ALTO_ESCENA - 140)); // banda de vuelo intermedia
     qreal amplitud = 30 + (rand() % 40);
@@ -110,13 +135,16 @@ void PantallaJuego::generarEnemigo(){
     agregarObstaculo(enemigo);
 }
 
-void PantallaJuego::generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio){
-    // Un solo objeto Civil representa a todo el grupo (se dibuja como
-    // un unico rectangulo grande). Evita crear un objeto por persona.
+Civil* PantallaJuego::generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio){
+    // Un solo objeto Civil representa a todo el grupo (dibuja la imagen
+    // de 1, 2 o 3 personas segun corresponda). Se centra justo encima
+    // del techo del edificio, usando el alto visual real de la imagen.
     int cantidad = 1 + (rand() % 3); // grupo de 1 a 3 personas
-    Civil *civil = new Civil(posXEdificio, topYEdificio - 16, cantidad);
+    qreal posY = topYEdificio - Civil::alturaVisual() / 2;
+    Civil *civil = new Civil(posXEdificio, posY, cantidad);
     agregarCivil(civil);
     civilesTotalNivel += cantidad;
+    return civil;
 }
 
 // ---------------------------------------------------------------
@@ -278,6 +306,17 @@ void PantallaJuego::revisarColisiones(){
 
                 // penetro demasiado o venia cayendo muy rapido: aterrizaje brusco = choque
                 vidas--;
+
+                // Si el edificio tenia un grupo de civiles sobre el techo
+                // y aun no habia sido resuelto, cae abatido junto con el
+                // edificio y se cuenta como perdido.
+                Civil *civilDelEdificio = edificio->obtenerCivilAsociado();
+                if (civilDelEdificio != nullptr && civilDelEdificio->estaActivo() &&
+                    !civilDelEdificio->estaRescatado() && !civilDelEdificio->estaAplastado()) {
+                    civilDelEdificio->aplastar();
+                    civilesPerdidos += civilDelEdificio->getCantidadPersonas();
+                }
+
                 eliminarObstaculoEnIndice(i);
                 if (vidas <= 0) {
                     finalizarJuego(EstadoJuego::Derrota);
@@ -388,7 +427,7 @@ void PantallaJuego::actualizarJuego(){
         return;
     }
 
-    helicoptero->actualizarFisica(ANCHO_ESCENA, ALTO_ESCENA);
+    helicoptero->actualizarFisica(ANCHO_ESCENA, ALTO_ESCENA - ALTURA_SUELO);
 
     // El piso destruye el helicoptero de inmediato, sin importar las vidas.
     if (helicoptero->tocoElSuelo()) {
@@ -402,14 +441,19 @@ void PantallaJuego::actualizarJuego(){
     if (contadorFramesEdificio >= intervaloEdificio) {
         generarEdificio();
         contadorFramesEdificio = 0;
-        intervaloEdificio = 70 + (rand() % 70);
+        // Con velocidadScroll=1.6, 140-260 frames = 224 a 416 px de
+        // separacion, siempre mayor que el ancho maximo posible de un
+        // edificio (~160px), para que nunca se amontonen entre si.
+        intervaloEdificio = 140 + (rand() % 120);
     }
 
     contadorFramesEnemigo++;
     if (contadorFramesEnemigo >= intervaloEnemigo) {
         generarEnemigo();
         contadorFramesEnemigo = 0;
-        intervaloEnemigo = 150 + (rand() % 150);
+        // 200-380 frames = 320 a 608 px de separacion, bastante mas que
+        // el ancho maximo de un enemigo (~100px).
+        intervaloEnemigo = 200 + (rand() % 180);
     }
 
     actualizarObstaculos();

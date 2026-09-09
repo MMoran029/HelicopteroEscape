@@ -3,6 +3,7 @@
 
 #include <QGraphicsItem>
 #include <QPainter>
+#include <QPixmap>
 
 class Helicoptero : public QGraphicsItem {
 public:
@@ -44,6 +45,10 @@ private:
     bool derecha;
     double angulo;
     bool enSuelo;
+
+    QPixmap imagen;
+    qreal anchoImagen;
+    qreal altoImagen;
 };
 
 #endif // HELICOPTERO_H

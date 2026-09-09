@@ -1,5 +1,19 @@
 #include "obstaculomovil.h"
 #include <cmath>
+#include <QTransform>
+
+QPixmap ObstaculoMovil::obtenerImagen(){
+    return QPixmap(":/imagenes/Imagenes/H_Enemigo.png");
+}
+
+qreal ObstaculoMovil::calcularAncho(qreal alto){
+    QPixmap referencia = obtenerImagen();
+    if (referencia.height() == 0) {
+        return alto;
+    }
+    qreal proporcion = static_cast<qreal>(referencia.width()) / static_cast<qreal>(referencia.height());
+    return alto * proporcion;
+}
 
 ObstaculoMovil::ObstaculoMovil(qreal posX, qreal posY, qreal ancho, qreal alto,
                                qreal amplitud, qreal velocidadVertical)
@@ -9,6 +23,12 @@ ObstaculoMovil::ObstaculoMovil(qreal posX, qreal posY, qreal ancho, qreal alto,
     velocidadVertical(velocidadVertical),
     anguloOscilacion(0)
 {
+    QPixmap original = obtenerImagen();
+
+    // La imagen original mira hacia la derecha; se refleja para que mire
+    // hacia la izquierda, su direccion real de vuelo (los enemigos se
+    // desplazan de derecha a izquierda por el scroll del escenario).
+    imagen = original.transformed(QTransform().scale(-1, 1));
 }
 
 void ObstaculoMovil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -16,22 +36,8 @@ void ObstaculoMovil::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    qreal mitadAncho = ancho / 2;
-    qreal mitadAlto = alto / 2;
-
-    // Cuerpo del helicoptero enemigo.
-    painter->setBrush(QColor(150, 30, 30));
-    painter->setPen(Qt::black);
-    painter->drawRoundedRect(-mitadAncho, -mitadAlto * 0.4, ancho, alto * 0.7, 4, 4);
-
-    // Barra del rotor principal.
-    painter->setPen(QPen(Qt::black, 2));
-    painter->drawLine(-mitadAncho, -mitadAlto * 0.4, mitadAncho, -mitadAlto * 0.4);
-
-    // Cola hacia atras (queda mirando a la izquierda, de frente al jugador).
-    painter->drawLine(-mitadAncho, 0, -mitadAncho * 0.5, -mitadAlto * 0.7);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
+    painter->drawPixmap(boundingRect().toRect(), imagen);
 }
 
 void ObstaculoMovil::actualizar(qreal velocidadScroll, int altoEscena)

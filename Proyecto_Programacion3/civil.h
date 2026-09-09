@@ -2,12 +2,13 @@
 #define CIVIL_H
 #include <QGraphicsItem>
 #include <QPainter>
+#include <QPixmap>
 
 class Civil : public QGraphicsItem {
 public:
-    // cantidadPersonas: cuantas personas representa este grupo/rectangulo.
-    // Se pinta como un solo bloque para no generar un objeto por persona;
-    // mas adelante este paint() se puede reemplazar por una imagen (QPixmap).
+    // cantidadPersonas: cuantas personas representa este grupo (1 a 3).
+    // Un solo objeto Civil dibuja la imagen correspondiente (Persona_1,
+    // Persona_2 o Persona_3) en vez de instanciar un objeto por persona.
     Civil(qreal posX, qreal posY, int cantidadPersonas = 1);
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -31,6 +32,11 @@ public:
     int getPuntosRescate() const { return puntosRescate; }
     int getCantidadPersonas() const { return cantidadPersonas; }
 
+    // Alto visual fijo que usan todas las imagenes de civiles (ver
+    // constructor). PantallaJuego lo usa para calcular con precision
+    // en que Y colocar el grupo justo sobre el techo de un edificio.
+    static qreal alturaVisual() { return 42.0; }
+
 private:
     bool rescatado;
     bool activo;
@@ -39,7 +45,12 @@ private:
     int cantidadPersonas;
     double tiempoParpadeo;
 
+    QPixmap imagen;
+    qreal anchoImagen;
+    qreal altoImagen;
+
+    static QPixmap obtenerImagen(int cantidadPersonas);
+
     // RECORDATORIO: animacion de parpadeo cuando quede poco tiempo en el nivel
-    // RECORDATORIO: reemplazar paint() por una imagen (QPixmap) de civiles
 };
 #endif // CIVIL_H

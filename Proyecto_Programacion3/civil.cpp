@@ -7,31 +7,58 @@ Civil::Civil(qreal posX, qreal posY, int cantidadPersonas)
     : rescatado(false), activo(true), aplastado(false), puntosRescate(100 * cantidadPersonas),
     cantidadPersonas(cantidadPersonas), tiempoParpadeo(0){
     setPos(posX, posY);
+
+    imagen = obtenerImagen(cantidadPersonas);
+
+    const qreal ALTO_OBJETIVO = alturaVisual();
+    if (imagen.height() > 0) {
+        qreal proporcion = static_cast<qreal>(imagen.width()) / static_cast<qreal>(imagen.height());
+        altoImagen = ALTO_OBJETIVO;
+        anchoImagen = ALTO_OBJETIVO * proporcion;
+    } else {
+        anchoImagen = 36;
+        altoImagen = 42;
+    }
+}
+
+QPixmap Civil::obtenerImagen(int cantidadPersonas){
+    if (cantidadPersonas >= 3) {
+        return QPixmap(":/imagenes/Imagenes/Persona_3.png");
+    }
+    if (cantidadPersonas == 2) {
+        return QPixmap(":/imagenes/Imagenes/Persona_2.png");
+    }
+    return QPixmap(":/imagenes/Imagenes/Persona_1.png");
 }
 
 QRectF Civil::boundingRect() const{
-    return QRectF(-20, -16, 40, 32);
+    return QRectF(-anchoImagen / 2, -altoImagen / 2, anchoImagen, altoImagen);
 }
 
 void Civil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     Q_UNUSED(option);
     Q_UNUSED(widget);
-    painter->setRenderHint(QPainter::Antialiasing);
-    if(aplastado == true){
-        painter->setBrush(QColor(120, 30, 30));
-    } else if(rescatado == true){
-        painter->setBrush(QColor(80, 200, 80));
-    } else {
-        painter->setBrush(QColor(200, 200, 40));
-    }
-    painter->setPen(Qt::black);
-    // Un solo rectangulo grande representa a todo el grupo de civiles.
-    // RECORDATORIO: aqui se puede reemplazar por painter->drawPixmap(...)
-    // cuando se tenga la imagen del grupo de civiles.
-    painter->drawRoundedRect(-18, -14, 36, 28, 4, 4);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
 
-    painter->setPen(Qt::black);
-    painter->drawText(QRectF(-18, -14, 36, 28), Qt::AlignCenter, QString::number(cantidadPersonas));
+    QRectF destino = boundingRect();
+
+    if (aplastado == true) {
+        // Se dibuja atenuado, como si hubiese quedado aplastado.
+        painter->setOpacity(0.45);
+        painter->drawPixmap(destino.toRect(), imagen);
+        painter->setOpacity(1.0);
+        return;
+    }
+
+    painter->drawPixmap(destino.toRect(), imagen);
+
+    if (rescatado == true) {
+        // Contorno verde de confirmacion (visible el ultimo frame antes
+        // de que PantallaJuego lo retire de la escena).
+        painter->setPen(QPen(QColor(90, 220, 90), 3));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(destino.adjusted(-3, -3, 3, 3), 6, 6);
+    }
 }
 
 bool Civil::estaRescatado() const{
@@ -81,5 +108,5 @@ void Civil::actualizar(qreal velocidadScroll){
 }
 
 bool Civil::fueraDePantalla() const{
-    return x() < -20;
+    return x() < -anchoImagen;
 }
