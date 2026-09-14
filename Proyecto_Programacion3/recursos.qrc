@@ -16,5 +16,7 @@
         <file>Imagenes/Piso.png</file>
         <file>Imagenes/BidonGasolina.png</file>
         <file>Imagenes/EstructuraBloqueadora.png</file>
+	<file>Imagenes/Bala_Jugador.png</file>
+	<file>Imagenes/Bala_Enemigo.png</file>
     </qresource>
 </RCC>
