@@ -1,6 +1,5 @@
 #include "obstaculomovil.h"
 #include <cmath>
-#include <QTransform>
 
 QPixmap ObstaculoMovil::obtenerImagen(){
     return QPixmap(":/imagenes/Imagenes/H_Enemigo.png");
@@ -23,12 +22,7 @@ ObstaculoMovil::ObstaculoMovil(qreal posX, qreal posY, qreal ancho, qreal alto,
     velocidadVertical(velocidadVertical),
     anguloOscilacion(0)
 {
-    QPixmap original = obtenerImagen();
-
-    // La imagen original mira hacia la derecha; se refleja para que mire
-    // hacia la izquierda, su direccion real de vuelo (los enemigos se
-    // desplazan de derecha a izquierda por el scroll del escenario).
-    imagen = original.transformed(QTransform().scale(-1, 1));
+    imagen = obtenerImagen();
 }
 
 void ObstaculoMovil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

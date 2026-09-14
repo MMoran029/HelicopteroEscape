@@ -1,5 +1,7 @@
+debug/bidon.o
 debug/civil.o
 debug/crearboton.o
+debug/disparo.o
 debug/main.o
 debug/mainwindow.o
 debug/helicoptero.o

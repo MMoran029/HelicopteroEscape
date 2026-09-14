@@ -5,13 +5,19 @@
 #include <QGraphicsPixmapItem>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
-PantallaJuego::PantallaJuego(QWidget *parent) : QWidget(parent),
+PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
+    nivelJuego(nivelJuego),
     obstaculos(nullptr), numObstaculos(0), capacidadObstaculos(0),
     civiles(nullptr), numCiviles(0), capacidadCiviles(0),
+    bidones(nullptr), numBidones(0), capacidadBidones(0),
     vidas(3), civilesRescatados(0), civilesTotalNivel(0), civilesPerdidos(0),
     distanciaRecorrida(0), distanciaMeta(6000), velocidadScroll(1.6),
-    estado(EstadoJuego::Jugando), juegoIniciado(false),
+    estado(EstadoJuego::Jugando),
+    combustible(100.0),
+    contadorFramesBidon(0), intervaloBidon(280),
+    juegoIniciado(false),
     contadorFramesEdificio(0), intervaloEdificio(150),
     contadorFramesEnemigo(0), intervaloEnemigo(260)
 {
@@ -19,6 +25,7 @@ PantallaJuego::PantallaJuego(QWidget *parent) : QWidget(parent),
 
     configurarEscena();
     configurarHUD();
+    configurarHUDCombustible();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -52,15 +59,19 @@ void PantallaJuego::configurarEscena(){
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Franja de piso: decoracion fija (no se mueve con el scroll, igual
-    // que el fondo). Se escala para cubrir exactamente el ancho de la
-    // escena con la altura definida en ALTURA_SUELO.
+    // Franja de piso: dos copias encadenadas para simular scroll
+    // infinito. Cuando una sale completamente de la vista por la
+    // izquierda, se reubica pegada detras de la otra.
     QPixmap pisoOriginal(":/imagenes/Imagenes/Piso.png");
     QPixmap pisoEscalado = pisoOriginal.scaled(ANCHO_ESCENA, ALTURA_SUELO,
-                                                Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QGraphicsPixmapItem *piso = escena->addPixmap(pisoEscalado);
-    piso->setPos(0, ALTO_ESCENA - ALTURA_SUELO);
-    piso->setZValue(-1);
+                                               Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    piso1 = escena->addPixmap(pisoEscalado);
+    piso1->setPos(0, ALTO_ESCENA - ALTURA_SUELO);
+    piso1->setZValue(-1);
+
+    piso2 = escena->addPixmap(pisoEscalado);
+    piso2->setPos(ANCHO_ESCENA, ALTO_ESCENA - ALTURA_SUELO);
+    piso2->setZValue(-1);
 
     helicoptero = new Helicoptero();
     helicoptero->setPos(100, ALTO_ESCENA / 2);
@@ -72,6 +83,18 @@ void PantallaJuego::configurarHUD(){
     hud->setStyleSheet("background-color: rgb(20,20,20); color: white; padding: 4px; font-weight: bold;");
     hud->setFixedHeight(26);
     actualizarHUD();
+}
+
+void PantallaJuego::configurarHUDCombustible(){
+    // Etiqueta flotante en la esquina superior derecha, separada del
+    // HUD de estadisticas, para que el combustible resalte a simple
+    // vista como en un tablero de instrumentos.
+    hudCombustible = new QLabel(this);
+    hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(240,210,80);"
+                                  "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
+    hudCombustible->setAlignment(Qt::AlignCenter);
+    actualizarHUDCombustible();
+    hudCombustible->raise();
 }
 
 void PantallaJuego::configurarPanelResultado(){
@@ -88,6 +111,12 @@ void PantallaJuego::resizeEvent(QResizeEvent *event){
     QWidget::resizeEvent(event);
     if (panelResultado != nullptr) {
         panelResultado->setGeometry(rect());
+    }
+    if (hudCombustible != nullptr) {
+        hudCombustible->adjustSize();
+        int margen = 10;
+        hudCombustible->move(width() - hudCombustible->width() - margen, margen + 26);
+        hudCombustible->raise();
     }
 }
 
@@ -123,16 +152,95 @@ void PantallaJuego::generarEdificio(){
     }
 }
 
+bool PantallaJuego::zonaOcupadaPorEdificio(qreal posYEnemigo, qreal altoEnemigo) const{
+    // Solo interesan los edificios que siguen cerca del borde derecho
+    // (donde tambien aparecen los enemigos nuevos). Un edificio que ya
+    // avanzo hacia la izquierda no estorba mas en el punto de spawn.
+    const qreal MARGEN_ZONA_SPAWN = 260.0;
+
+    qreal topEnemigo = posYEnemigo - altoEnemigo / 2;
+    qreal bottomEnemigo = posYEnemigo + altoEnemigo / 2;
+
+    for(int i=0 ; i<numObstaculos ; i++){
+        ObstaculoEstatico *edificio = dynamic_cast<ObstaculoEstatico*>(obstaculos[i]);
+        if(edificio == nullptr){
+            continue;
+        }
+        if(edificio->x() < ANCHO_ESCENA - MARGEN_ZONA_SPAWN){
+            continue;
+        }
+
+        // Se extiende el techo hacia arriba por si hay civiles parados
+        // encima del edificio, para que tampoco se aparezca sobre ellos.
+        qreal topEdificio = edificio->sceneBoundingRect().top() - Civil::alturaVisual();
+        qreal bottomEdificio = edificio->sceneBoundingRect().bottom();
+
+        bool seSolapan = (topEnemigo < bottomEdificio) && (bottomEnemigo > topEdificio);
+        if(seSolapan == true){
+            return true;
+        }
+    }
+    return false;
+}
+
 void PantallaJuego::generarEnemigo(){
     qreal alto = 30 + (rand() % 13);       // alto entre 30 y 42 (mas pequenos que antes)
     qreal ancho = ObstaculoMovil::calcularAncho(alto);
     qreal posX = ANCHO_ESCENA + ancho;
-    qreal posY = 60 + (rand() % (ALTO_ESCENA - 140)); // banda de vuelo intermedia
+
+    qreal posY = 0;
+    bool posicionValida = false;
+    int intentos = 0;
+
+    // Se prueban varias alturas al azar hasta encontrar una que no
+    // choque con un edificio (o sus civiles) recien aparecido. Si
+    // ninguna funciona, se cancela este intento y se genera el
+    // enemigo mas adelante, en vez de incrustarlo a la fuerza.
+    while(intentos < 6 && posicionValida == false){
+        posY = 60 + (rand() % (ALTO_ESCENA - 140)); // banda de vuelo intermedia
+        if(zonaOcupadaPorEdificio(posY, alto) == false){
+            posicionValida = true;
+        }
+        intentos++;
+    }
+
+    if(posicionValida == false){
+        return;
+    }
+
     qreal amplitud = 30 + (rand() % 40);
     qreal velocidadVertical = 0.04 + (rand() % 5) / 100.0;
 
     ObstaculoMovil *enemigo = new ObstaculoMovil(posX, posY, ancho, alto, amplitud, velocidadVertical);
     agregarObstaculo(enemigo);
+}
+
+void PantallaJuego::generarBidon(){
+    qreal posX = ANCHO_ESCENA + Bidon::alturaVisual();
+    qreal alto = Bidon::alturaVisual();
+
+    qreal posY = 0;
+    bool posicionValida = false;
+    int intentos = 0;
+
+    // Mismo criterio que generarEnemigo(): se prueban varias alturas
+    // hasta encontrar una que no caiga dentro de un edificio (o sus
+    // civiles) recien aparecido, para que el bidon nunca quede
+    // incrustado dentro de una estructura.
+    while(intentos < 6 && posicionValida == false){
+        posY = 70 + (rand() % (ALTO_ESCENA - ALTURA_SUELO - 140));
+        if(zonaOcupadaPorEdificio(posY, alto) == false){
+            posicionValida = true;
+        }
+        intentos++;
+    }
+
+    if(posicionValida == false){
+        return;
+    }
+
+    Bidon *bidon = new Bidon(posX, posY);
+    agregarBidon(bidon);
 }
 
 Civil* PantallaJuego::generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio){
@@ -188,6 +296,25 @@ void PantallaJuego::agregarCivil(Civil *civil){
     escena->addItem(civil);
 }
 
+void PantallaJuego::agregarBidon(Bidon *bidon){
+    if(numBidones == capacidadBidones){
+        int nuevaCapacidad = (capacidadBidones == 0) ? 8 : capacidadBidones * 2;
+        Bidon **nuevoArreglo = new Bidon*[nuevaCapacidad];
+
+        for(int i=0 ; i<numBidones ; i++){
+            nuevoArreglo[i] = bidones[i];
+        }
+
+        delete[] bidones;
+        bidones = nuevoArreglo;
+        capacidadBidones = nuevaCapacidad;
+    }
+
+    bidones[numBidones] = bidon;
+    numBidones++;
+    escena->addItem(bidon);
+}
+
 void PantallaJuego::eliminarObstaculoEnIndice(int indice){
     Obstaculo *obs = obstaculos[indice];
     escena->removeItem(obs); // se retira de la escena antes de liberar memoria
@@ -208,6 +335,17 @@ void PantallaJuego::eliminarCivilEnIndice(int indice){
         civiles[i] = civiles[i + 1];
     }
     numCiviles--;
+}
+
+void PantallaJuego::eliminarBidonEnIndice(int indice){
+    Bidon *bidon = bidones[indice];
+    escena->removeItem(bidon);
+    delete bidon;
+
+    for(int i=indice ; i<numBidones - 1 ; i++){
+        bidones[i] = bidones[i + 1];
+    }
+    numBidones--;
 }
 
 void PantallaJuego::eliminarObstaculosFuera(){
@@ -237,6 +375,17 @@ void PantallaJuego::eliminarCivilesFuera(){
     }
 }
 
+void PantallaJuego::eliminarBidonesFuera(){
+    for(int i=numBidones - 1 ; i>=0 ; i--){
+        bool seFue = bidones[i]->fueraDePantalla();
+        bool yaRecogido = bidones[i]->estaRecogido();
+
+        if(seFue || yaRecogido){
+            eliminarBidonEnIndice(i);
+        }
+    }
+}
+
 void PantallaJuego::limpiarNivel(){
     if (obstaculos != nullptr) {
         for (int i = 0; i < numObstaculos; ++i) {
@@ -259,6 +408,17 @@ void PantallaJuego::limpiarNivel(){
     }
     numCiviles = 0;
     capacidadCiviles = 0;
+
+    if (bidones != nullptr) {
+        for (int i = 0; i < numBidones; ++i) {
+            escena->removeItem(bidones[i]);
+            delete bidones[i];
+        }
+        delete[] bidones;
+        bidones = nullptr;
+    }
+    numBidones = 0;
+    capacidadBidones = 0;
 }
 
 // ---------------------------------------------------------------
@@ -276,6 +436,24 @@ void PantallaJuego::actualizarCiviles(){
     }
 }
 
+void PantallaJuego::actualizarBidones(){
+    for(int i=0 ; i<numBidones ; i++){
+        bidones[i]->actualizar(velocidadScroll);
+    }
+}
+
+void PantallaJuego::actualizarPiso(){
+    piso1->setPos(piso1->x() - velocidadScroll, piso1->y());
+    piso2->setPos(piso2->x() - velocidadScroll, piso2->y());
+
+    if(piso1->x() <= -ANCHO_ESCENA){
+        piso1->setPos(piso2->x() + ANCHO_ESCENA, piso1->y());
+    }
+    if(piso2->x() <= -ANCHO_ESCENA){
+        piso2->setPos(piso1->x() + ANCHO_ESCENA, piso2->y());
+    }
+}
+
 void PantallaJuego::revisarColisiones(){
     const qreal TOLERANCIA_ATERRIZAJE = 12.0;      // penetracion maxima que se considera "aterrizaje", no choque
     const qreal VELOCIDAD_MAXIMA_ATERRIZAJE = 4.5; // si baja mas rapido que esto, el aterrizaje se considera brusco
@@ -290,7 +468,7 @@ void PantallaJuego::revisarColisiones(){
             // se posa en vez de destruirse.
             QRectF rectEdificio = edificio->sceneBoundingRect();
             bool solapaHorizontal = (rectHelicoptero.right() > rectEdificio.left()) &&
-                                     (rectHelicoptero.left() < rectEdificio.right());
+                                    (rectHelicoptero.left() < rectEdificio.right());
 
             if (solapaHorizontal && rectHelicoptero.bottom() >= rectEdificio.top()) {
                 qreal penetracion = rectHelicoptero.bottom() - rectEdificio.top();
@@ -364,6 +542,37 @@ void PantallaJuego::revisarRescates(){
     }
 }
 
+void PantallaJuego::revisarRecoleccionCombustible(){
+    const qreal DISTANCIA_RECOLECCION = 40.0;
+    qreal helicX = helicoptero->x();
+    qreal helicY = helicoptero->y();
+
+    for(int i=0 ; i<numBidones ; i++){
+        if(bidones[i]->estaRecogido() == true){
+            continue;
+        }
+
+        qreal dx = helicX - bidones[i]->x();
+        qreal dy = helicY - bidones[i]->y();
+        qreal distancia = sqrt(dx * dx + dy * dy);
+
+        if(distancia < DISTANCIA_RECOLECCION){
+            bidones[i]->recoger();
+            combustible += bidones[i]->getCantidadCombustible();
+            if(combustible > 100.0){
+                combustible = 100.0;
+            }
+        }
+    }
+}
+
+void PantallaJuego::actualizarCombustible(){
+    combustible -= obtenerConsumoCombustible();
+    if(combustible < 0.0){
+        combustible = 0.0;
+    }
+}
+
 void PantallaJuego::actualizarHUD(){
     int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
     QString texto = QString("Vidas: %1   |   Rescatados: %2   |   Perdidos: %3   |   Progreso: %4%")
@@ -372,6 +581,33 @@ void PantallaJuego::actualizarHUD(){
                         .arg(civilesPerdidos)
                         .arg(progreso);
     hud->setText(texto);
+}
+
+void PantallaJuego::actualizarHUDCombustible(){
+    int porcentaje = static_cast<int>(combustible);
+    QString texto = QString("Combustible: %1%").arg(porcentaje);
+    hudCombustible->setText(texto);
+
+    if(porcentaje <= 20){
+        hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(230,80,80);"
+                                      "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
+    } else {
+        hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(240,210,80);"
+                                      "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
+    }
+    hudCombustible->adjustSize();
+}
+
+int PantallaJuego::obtenerIntervaloBidon() const{
+    // Menos bidones a medida que sube el nivel: el intervalo crece,
+    // asi aparecen con menos frecuencia.
+    return 280 + (nivelJuego - 1) * 140;
+}
+
+double PantallaJuego::obtenerConsumoCombustible() const{
+    // Consumo por frame. Sube un poco con el nivel para que administrar
+    // el combustible sea mas exigente en niveles avanzados.
+    return 0.075 + (nivelJuego - 1) * 0.015;
 }
 
 void PantallaJuego::finalizarJuego(EstadoJuego resultado){
@@ -406,12 +642,16 @@ void PantallaJuego::reiniciarNivel(){
     civilesTotalNivel = 0;
     civilesPerdidos = 0;
     distanciaRecorrida = 0;
+    combustible = 100.0;
+    contadorFramesBidon = 0;
+    intervaloBidon = obtenerIntervaloBidon();
     contadorFramesEdificio = 0;
     contadorFramesEnemigo = 0;
     estado = EstadoJuego::Jugando;
     juegoIniciado = false;
 
     actualizarHUD();
+    actualizarHUDCombustible();
     timerJuego->start(16);
 }
 
@@ -456,11 +696,22 @@ void PantallaJuego::actualizarJuego(){
         intervaloEnemigo = 200 + (rand() % 180);
     }
 
+    contadorFramesBidon++;
+    if(contadorFramesBidon >= intervaloBidon){
+        generarBidon();
+        contadorFramesBidon = 0;
+        intervaloBidon = obtenerIntervaloBidon() + (rand() % 100);
+    }
+
     actualizarObstaculos();
     actualizarCiviles();
+    actualizarBidones();
+    actualizarCombustible();
+    actualizarPiso();
 
     eliminarObstaculosFuera();
     eliminarCivilesFuera();
+    eliminarBidonesFuera();
 
     revisarColisiones();
     if (estado != EstadoJuego::Jugando) {
@@ -468,6 +719,14 @@ void PantallaJuego::actualizarJuego(){
     }
 
     revisarRescates();
+    revisarRecoleccionCombustible();
+
+    // Sin combustible, el helicoptero se queda sin poder de vuelo:
+    // se cuenta como derrota, igual que chocar contra el suelo.
+    if(combustible <= 0.0){
+        finalizarJuego(EstadoJuego::Derrota);
+        return;
+    }
 
     if (distanciaRecorrida >= distanciaMeta) {
         finalizarJuego(EstadoJuego::Victoria);
@@ -475,6 +734,7 @@ void PantallaJuego::actualizarJuego(){
     }
 
     actualizarHUD();
+    actualizarHUDCombustible();
 }
 
 void PantallaJuego::keyPressEvent(QKeyEvent *event){

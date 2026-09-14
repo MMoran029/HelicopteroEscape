@@ -7,10 +7,14 @@
         <file>Imagenes/Edificio_2.png</file>
         <file>Imagenes/Edificio_3.png</file>
         <file>Imagenes/H_Jugador.png</file>
+        <file>Imagenes/H_Jugador_Armas.png</file>
         <file>Imagenes/H_Enemigo.png</file>
+        <file>Imagenes/H_Enemigo_Armas.png</file>
         <file>Imagenes/Persona_1.png</file>
         <file>Imagenes/Persona_2.png</file>
         <file>Imagenes/Persona_3.png</file>
         <file>Imagenes/Piso.png</file>
+        <file>Imagenes/BidonGasolina.png</file>
+        <file>Imagenes/EstructuraBloqueadora.png</file>
     </qresource>
 </RCC>

@@ -6,8 +6,10 @@ TARGET = HelicopteroRescate
 TEMPLATE = app
 
 SOURCES += \
+    bidon.cpp \
     civil.cpp \
     crearboton.cpp \
+    disparo.cpp \
     main.cpp \
     mainwindow.cpp \
     helicoptero.cpp \
@@ -21,8 +23,10 @@ SOURCES += \
     pantallamisiones.cpp
 
 HEADERS += \
+    bidon.h \
     civil.h \
     crearboton.h \
+    disparo.h \
     mainwindow.h \
     helicoptero.h \
     menuprincipal.h \
@@ -35,6 +39,4 @@ HEADERS += \
     pantallamisiones.h
 
 RESOURCES += \
-    recursos.qrc \
-    recursos.qrc \
     recursos.qrc

@@ -1,5 +1,7 @@
+release/bidon.o
 release/civil.o
 release/crearboton.o
+release/disparo.o
 release/main.o
 release/mainwindow.o
 release/helicoptero.o

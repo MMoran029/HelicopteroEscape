@@ -1,6 +1,5 @@
 #include "helicoptero.h"
 #include <algorithm>
-#include <QTransform>
 
 Helicoptero::Helicoptero()
     : velocidadY(0), velocidadX(0),
@@ -10,13 +9,9 @@ Helicoptero::Helicoptero()
     subiendo(false), bajando(false), izquierda(false), derecha(false),
     angulo(0), enSuelo(false)
 {
-    QPixmap original(":/imagenes/Imagenes/H_Jugador.png");
-
-    // La imagen original mira hacia la izquierda; se refleja horizontal-
-    // mente para que el helicoptero del jugador mire hacia la derecha
-    // (su direccion de avance, ya que el escenario se desplaza a la
-    // izquierda por debajo de el).
-    imagen = original.transformed(QTransform().scale(-1, 1));
+    // El sprite ya viene orientado hacia la derecha (direccion de
+    // avance del jugador), asi que se usa tal cual, sin reflejar.
+    imagen = QPixmap(":/imagenes/Imagenes/H_Jugador.png");
 
     const qreal ANCHO_OBJETIVO = 84.0;
     if (imagen.height() > 0) {
