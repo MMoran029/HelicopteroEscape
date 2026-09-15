@@ -10,10 +10,12 @@ SOURCES += \
     civil.cpp \
     crearboton.cpp \
     disparo.cpp \
+    estructurabloqueadora.cpp \
     main.cpp \
     mainwindow.cpp \
     helicoptero.cpp \
     menuprincipal.cpp \
+    nivel2.cpp \
     obstaculo.cpp \
     obstaculoestatico.cpp \
     obstaculomovil.cpp \
@@ -27,9 +29,11 @@ HEADERS += \
     civil.h \
     crearboton.h \
     disparo.h \
+    estructurabloqueadora.h \
     mainwindow.h \
     helicoptero.h \
     menuprincipal.h \
+    nivel2.h \
     obstaculo.h \
     obstaculoestatico.h \
     obstaculomovil.h \

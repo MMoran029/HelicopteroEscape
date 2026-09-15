@@ -2,10 +2,12 @@ debug/bidon.o
 debug/civil.o
 debug/crearboton.o
 debug/disparo.o
+debug/estructurabloqueadora.o
 debug/main.o
 debug/mainwindow.o
 debug/helicoptero.o
 debug/menuprincipal.o
+debug/nivel2.o
 debug/obstaculo.o
 debug/obstaculoestatico.o
 debug/obstaculomovil.o

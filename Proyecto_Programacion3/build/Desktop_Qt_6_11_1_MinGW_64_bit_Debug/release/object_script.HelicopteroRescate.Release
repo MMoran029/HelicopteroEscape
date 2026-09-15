@@ -2,10 +2,12 @@ release/bidon.o
 release/civil.o
 release/crearboton.o
 release/disparo.o
+release/estructurabloqueadora.o
 release/main.o
 release/mainwindow.o
 release/helicoptero.o
 release/menuprincipal.o
+release/nivel2.o
 release/obstaculo.o
 release/obstaculoestatico.o
 release/obstaculomovil.o

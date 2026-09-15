@@ -12,7 +12,11 @@ PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
     obstaculos(nullptr), numObstaculos(0), capacidadObstaculos(0),
     civiles(nullptr), numCiviles(0), capacidadCiviles(0),
     bidones(nullptr), numBidones(0), capacidadBidones(0),
-    vidas(3), civilesRescatados(0), civilesTotalNivel(0), civilesPerdidos(0),
+    disparos(nullptr), numDisparos(0), capacidadDisparos(0),
+    estructura(nullptr), estructuraGenerada(false),
+    teclaEspacioPresionada(false), contadorEnfriamientoDisparo(0),
+    contadorInvulnerable(0),
+    vidas(3), civilesRescatados(0), civilesTotalNivel(0), civilesPerdidos(0),puntos(0),
     distanciaRecorrida(0), distanciaMeta(6000), velocidadScroll(1.6),
     estado(EstadoJuego::Jugando),
     combustible(100.0),
@@ -76,6 +80,10 @@ void PantallaJuego::configurarEscena(){
     helicoptero = new Helicoptero();
     helicoptero->setPos(100, ALTO_ESCENA / 2);
     escena->addItem(helicoptero);
+}
+
+void PantallaJuego::actualizarSpriteJugador(){
+    helicoptero->setConArmas(jugadorTieneArmas());
 }
 
 void PantallaJuego::configurarHUD(){
@@ -184,8 +192,12 @@ bool PantallaJuego::zonaOcupadaPorEdificio(qreal posYEnemigo, qreal altoEnemigo)
 }
 
 void PantallaJuego::generarEnemigo(){
+    // Se decide primero si este enemigo trae armas, porque el ancho
+    // correcto depende de que sprite se va a usar.
+    bool conArmas = (rand() % 100) < static_cast<int>(probabilidadEnemigoArmado() * 100);
+
     qreal alto = 30 + (rand() % 13);       // alto entre 30 y 42 (mas pequenos que antes)
-    qreal ancho = ObstaculoMovil::calcularAncho(alto);
+    qreal ancho = ObstaculoMovil::calcularAncho(alto, conArmas);
     qreal posX = ANCHO_ESCENA + ancho;
 
     qreal posY = 0;
@@ -211,8 +223,19 @@ void PantallaJuego::generarEnemigo(){
     qreal amplitud = 30 + (rand() % 40);
     qreal velocidadVertical = 0.04 + (rand() % 5) / 100.0;
 
-    ObstaculoMovil *enemigo = new ObstaculoMovil(posX, posY, ancho, alto, amplitud, velocidadVertical);
+    ObstaculoMovil *enemigo = new ObstaculoMovil(posX, posY, ancho, alto, amplitud, velocidadVertical, conArmas);
     agregarObstaculo(enemigo);
+}
+
+void PantallaJuego::generarEstructura(){
+    qreal alto = (ALTO_ESCENA - ALTURA_SUELO) * 1;
+    qreal ancho = EstructuraBloqueadora::calcularAncho(alto);
+    qreal posX = ANCHO_ESCENA + ancho;
+    qreal posY = (ALTO_ESCENA - ALTURA_SUELO) / 2;
+
+    estructura = new EstructuraBloqueadora(posX, posY, alto);
+    escena->addItem(estructura);
+    estructuraGenerada = true;
 }
 
 void PantallaJuego::generarBidon(){
@@ -315,6 +338,60 @@ void PantallaJuego::agregarBidon(Bidon *bidon){
     escena->addItem(bidon);
 }
 
+void PantallaJuego::agregarDisparo(Disparo *disparo){
+    if(numDisparos == capacidadDisparos){
+        int nuevaCapacidad = (capacidadDisparos == 0) ? 8 : capacidadDisparos * 2;
+        Disparo **nuevoArreglo = new Disparo*[nuevaCapacidad];
+
+        for(int i=0 ; i<numDisparos ; i++){
+            nuevoArreglo[i] = disparos[i];
+        }
+
+        delete[] disparos;
+        disparos = nuevoArreglo;
+        capacidadDisparos = nuevaCapacidad;
+    }
+
+    disparos[numDisparos] = disparo;
+    numDisparos++;
+    escena->addItem(disparo);
+}
+
+void PantallaJuego::dispararJugador(){
+    // El disparo sale desde el frente del helicoptero (borde derecho,
+    // direccion de avance).
+    qreal posX = helicoptero->x() + 34;
+    qreal posY = helicoptero->y();
+
+    Disparo *disparo = new Disparo(posX, posY, 9.0, true);
+    agregarDisparo(disparo);
+}
+
+void PantallaJuego::dispararEnemigos(){
+    for(int i=0 ; i<numObstaculos ; i++){
+        ObstaculoMovil *enemigo = dynamic_cast<ObstaculoMovil*>(obstaculos[i]);
+        if(enemigo == nullptr){
+            continue;
+        }
+        if(enemigo->estaArmado() == false){
+            continue;
+        }
+        // Solo disparan los que ya son visibles en pantalla.
+        if(enemigo->x() < 0 || enemigo->x() > ANCHO_ESCENA){
+            continue;
+        }
+
+        double probabilidad = probabilidadDisparoEnemigoPorFrame();
+        int umbral = static_cast<int>(probabilidad * 10000);
+        if((rand() % 10000) < umbral){
+            qreal posX = enemigo->x() - 24; // borde izquierdo, direccion de avance del enemigo
+            qreal posY = enemigo->y();
+            Disparo *disparo = new Disparo(posX, posY, -7.0, false);
+            agregarDisparo(disparo);
+        }
+    }
+}
+
 void PantallaJuego::eliminarObstaculoEnIndice(int indice){
     Obstaculo *obs = obstaculos[indice];
     escena->removeItem(obs); // se retira de la escena antes de liberar memoria
@@ -367,6 +444,7 @@ void PantallaJuego::eliminarCivilesFuera(){
         // se cuenta como perdido (se dejo atras).
         if (seFue && !yaResuelto) {
             civilesPerdidos += civiles[i]->getCantidadPersonas();
+            puntos -= 100 * civiles[i]->getCantidadPersonas();
         }
 
         if (seFue || yaResuelto) {
@@ -382,6 +460,25 @@ void PantallaJuego::eliminarBidonesFuera(){
 
         if(seFue || yaRecogido){
             eliminarBidonEnIndice(i);
+        }
+    }
+}
+
+void PantallaJuego::eliminarDisparoEnIndice(int indice){
+    Disparo *disparo = disparos[indice];
+    escena->removeItem(disparo);
+    delete disparo;
+
+    for(int i=indice ; i<numDisparos - 1 ; i++){
+        disparos[i] = disparos[i + 1];
+    }
+    numDisparos--;
+}
+
+void PantallaJuego::eliminarDisparosFuera(){
+    for(int i=numDisparos - 1 ; i>=0 ; i--){
+        if(disparos[i]->fueraDePantalla(ANCHO_ESCENA) == true){
+            eliminarDisparoEnIndice(i);
         }
     }
 }
@@ -419,6 +516,24 @@ void PantallaJuego::limpiarNivel(){
     }
     numBidones = 0;
     capacidadBidones = 0;
+
+    if (disparos != nullptr) {
+        for (int i = 0; i < numDisparos; ++i) {
+            escena->removeItem(disparos[i]);
+            delete disparos[i];
+        }
+        delete[] disparos;
+        disparos = nullptr;
+    }
+    numDisparos = 0;
+    capacidadDisparos = 0;
+
+    if (estructura != nullptr) {
+        escena->removeItem(estructura);
+        delete estructura;
+        estructura = nullptr;
+    }
+    estructuraGenerada = false;
 }
 
 // ---------------------------------------------------------------
@@ -442,6 +557,20 @@ void PantallaJuego::actualizarBidones(){
     }
 }
 
+void PantallaJuego::actualizarDisparos(){
+    for(int i=0 ; i<numDisparos ; i++){
+        disparos[i]->actualizar();
+    }
+}
+
+void PantallaJuego::actualizarEstructura(){
+    if(estructura != nullptr){
+        estructura->actualizar(velocidadScroll, ALTO_ESCENA);
+        if(estructura->fueraDePantalla() == true){
+            finalizarJuego(EstadoJuego::Derrota);
+        }
+    }
+}
 void PantallaJuego::actualizarPiso(){
     piso1->setPos(piso1->x() - velocidadScroll, piso1->y());
     piso2->setPos(piso2->x() - velocidadScroll, piso2->y());
@@ -484,15 +613,15 @@ void PantallaJuego::revisarColisiones(){
 
                 // penetro demasiado o venia cayendo muy rapido: aterrizaje brusco = choque
                 vidas--;
-
+                puntos -= 100;
                 // Si el edificio tenia un grupo de civiles sobre el techo
                 // y aun no habia sido resuelto, cae abatido junto con el
                 // edificio y se cuenta como perdido.
                 Civil *civilDelEdificio = edificio->obtenerCivilAsociado();
-                if (civilDelEdificio != nullptr && civilDelEdificio->estaActivo() &&
-                    !civilDelEdificio->estaRescatado() && !civilDelEdificio->estaAplastado()) {
+                if (civilDelEdificio != nullptr && civilDelEdificio->estaActivo() && !civilDelEdificio->estaRescatado() && !civilDelEdificio->estaAplastado()){
                     civilDelEdificio->aplastar();
                     civilesPerdidos += civilDelEdificio->getCantidadPersonas();
+                    puntos -= 100 * civilDelEdificio->getCantidadPersonas();
                 }
 
                 eliminarObstaculoEnIndice(i);
@@ -506,6 +635,7 @@ void PantallaJuego::revisarColisiones(){
             // Obstaculo movil (enemigo): cualquier contacto es dano, sin excepciones.
             if (rectHelicoptero.intersects(obstaculos[i]->sceneBoundingRect())) {
                 vidas--;
+                puntos -= 100;
                 eliminarObstaculoEnIndice(i);
 
                 if (vidas <= 0) {
@@ -534,9 +664,11 @@ void PantallaJuego::revisarRescates(){
                 // El helicoptero les cayo encima demasiado rapido: se aplastan.
                 civiles[i]->aplastar();
                 civilesPerdidos += civiles[i]->getCantidadPersonas();
+                puntos -= 100 * civiles[i]->getCantidadPersonas();
             } else if (civiles[i]->verificarCercania(helicX, helicY, DISTANCIA_RESCATE)) {
                 civiles[i]->rescatar();
                 civilesRescatados += civiles[i]->getCantidadPersonas();
+                puntos += 100 * civiles[i]->getCantidadPersonas();
             }
         }
     }
@@ -573,13 +705,107 @@ void PantallaJuego::actualizarCombustible(){
     }
 }
 
+void PantallaJuego::revisarColisionesDisparos(){
+    for(int i=numDisparos - 1 ; i>=0 ; i--){
+        Disparo *disparo = disparos[i];
+        bool disparoConsumido = false;
+
+        if(disparo->esDeJugador() == true){
+            // Contra civiles: un disparo del jugador tambien puede
+            // matarlos por accidente si les da.
+
+            for(int j=0 ; j<numCiviles ; j++){
+                if(civiles[j]->estaActivo() == false){
+                    continue;
+                }
+                if(disparo->sceneBoundingRect().intersects(civiles[j]->sceneBoundingRect()) == true){
+                    civiles[j]->aplastar();
+                    civilesPerdidos += civiles[j]->getCantidadPersonas();
+                    puntos -= 100 * civiles[j]->getCantidadPersonas();
+                    disparoConsumido = true;
+                    break;
+                }
+            }
+
+            // Contra helicopteros enemigos.
+            if(disparoConsumido == false){
+                for(int j=0 ; j<numObstaculos ; j++){
+                    ObstaculoMovil *enemigo = dynamic_cast<ObstaculoMovil*>(obstaculos[j]);
+                    if(enemigo == nullptr){
+                        continue;
+                    }
+                    if(disparo->sceneBoundingRect().intersects(enemigo->sceneBoundingRect()) == true){
+                        puntos += 25;
+                        eliminarObstaculoEnIndice(j);
+                        disparoConsumido = true;
+                        break;
+                    }
+                }
+            }
+
+            // Contra la estructura bloqueadora.
+            if(disparoConsumido == false && estructura != nullptr){
+                if(disparo->sceneBoundingRect().intersects(estructura->sceneBoundingRect()) == true){
+                    bool destruida = estructura->recibirImpacto();
+                    disparoConsumido = true;
+
+                    if(destruida == true){
+                        escena->removeItem(estructura);
+                        delete estructura;
+                        estructura = nullptr;
+                    }
+                }
+            }
+        } else {
+            // Disparo enemigo: solo puede danar al helicoptero del jugador.
+            if(disparo->sceneBoundingRect().intersects(helicoptero->sceneBoundingRect()) == true){
+                vidas--;
+                puntos -= 100;
+                disparoConsumido = true;
+                if(vidas <= 0){
+                    finalizarJuego(EstadoJuego::Derrota);
+                }
+            }
+        }
+
+        if(disparoConsumido == true){
+            eliminarDisparoEnIndice(i);
+        }
+    }
+}
+
+void PantallaJuego::revisarColisionEstructura(){
+    if(estructura == nullptr){
+        return;
+    }
+
+    if(contadorInvulnerable > 0){
+        contadorInvulnerable--;
+        return;
+    }
+
+    QRectF rectHelicoptero = helicoptero->sceneBoundingRect();
+    if(rectHelicoptero.intersects(estructura->sceneBoundingRect()) == true){
+        vidas--;
+        contadorInvulnerable = 40;
+        // Se separa al helicoptero de la estructura para que no siga
+        // tocandola de inmediato.
+        helicoptero->setPos(helicoptero->x() - 40, helicoptero->y());
+
+        if(vidas <= 0){
+            finalizarJuego(EstadoJuego::Derrota);
+        }
+    }
+}
+
 void PantallaJuego::actualizarHUD(){
     int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
-    QString texto = QString("Vidas: %1   |   Rescatados: %2   |   Perdidos: %3   |   Progreso: %4%")
+    QString texto = QString("Vidas: %1   |   Rescatados: %2   |   Perdidos: %3   |   Progreso: %4%   |   Puntos: %5")
                         .arg(vidas)
                         .arg(civilesRescatados)
                         .arg(civilesPerdidos)
-                        .arg(progreso);
+                        .arg(progreso)
+                        .arg(puntos);
     hud->setText(texto);
 }
 
@@ -607,7 +833,7 @@ int PantallaJuego::obtenerIntervaloBidon() const{
 double PantallaJuego::obtenerConsumoCombustible() const{
     // Consumo por frame. Sube un poco con el nivel para que administrar
     // el combustible sea mas exigente en niveles avanzados.
-    return 0.075 + (nivelJuego - 1) * 0.015;
+    return 0.045 + (nivelJuego - 1) * 0.015;
 }
 
 void PantallaJuego::finalizarJuego(EstadoJuego resultado){
@@ -641,12 +867,16 @@ void PantallaJuego::reiniciarNivel(){
     civilesRescatados = 0;
     civilesTotalNivel = 0;
     civilesPerdidos = 0;
+    puntos = 0;
     distanciaRecorrida = 0;
     combustible = 100.0;
     contadorFramesBidon = 0;
     intervaloBidon = obtenerIntervaloBidon();
     contadorFramesEdificio = 0;
     contadorFramesEnemigo = 0;
+    teclaEspacioPresionada = false;
+    contadorEnfriamientoDisparo = 0;
+    contadorInvulnerable = 0;
     estado = EstadoJuego::Jugando;
     juegoIniciado = false;
 
@@ -667,7 +897,10 @@ void PantallaJuego::actualizarJuego(){
         return;
     }
 
-    helicoptero->actualizarFisica(ANCHO_ESCENA, ALTO_ESCENA - ALTURA_SUELO);
+    qreal fuerzaEmpujeX = 0.0;
+    qreal fuerzaEmpujeY = 0.0;
+    obtenerFuerzaEmpuje(fuerzaEmpujeX, fuerzaEmpujeY);
+    helicoptero->actualizarFisica(ANCHO_ESCENA, ALTO_ESCENA - ALTURA_SUELO, fuerzaEmpujeX, fuerzaEmpujeY);
 
     // El piso destruye el helicoptero de inmediato, sin importar las vidas.
     if (helicoptero->tocoElSuelo()) {
@@ -676,6 +909,14 @@ void PantallaJuego::actualizarJuego(){
     }
 
     distanciaRecorrida += velocidadScroll;
+    if(usaEstructuraBloqueadora() == true && estructura != nullptr && estructura->estaDestruida() == false){
+        // No se puede "avanzar" mas alla de la meta mientras la
+        // estructura siga viva: se congela el progreso justo en el
+        // limite hasta que la destruyan.
+        if(distanciaRecorrida > distanciaMeta){
+            distanciaRecorrida = distanciaMeta;
+        }
+    }
 
     contadorFramesEdificio++;
     if (contadorFramesEdificio >= intervaloEdificio) {
@@ -703,15 +944,33 @@ void PantallaJuego::actualizarJuego(){
         intervaloBidon = obtenerIntervaloBidon() + (rand() % 100);
     }
 
+    if(usaEstructuraBloqueadora() == true && estructuraGenerada == false && distanciaRecorrida >= distanciaMeta * 0.55){
+        generarEstructura();
+    }
+
+    if(jugadorTieneArmas() == true){
+        if(contadorEnfriamientoDisparo > 0){
+            contadorEnfriamientoDisparo--;
+        }
+        if(teclaEspacioPresionada == true && contadorEnfriamientoDisparo <= 0){
+            dispararJugador();
+            contadorEnfriamientoDisparo = 14; // ~0.22s entre disparos a 60fps
+        }
+        dispararEnemigos();
+    }
+
     actualizarObstaculos();
     actualizarCiviles();
     actualizarBidones();
     actualizarCombustible();
     actualizarPiso();
+    actualizarDisparos();
+    actualizarEstructura();
 
     eliminarObstaculosFuera();
     eliminarCivilesFuera();
     eliminarBidonesFuera();
+    eliminarDisparosFuera();
 
     revisarColisiones();
     if (estado != EstadoJuego::Jugando) {
@@ -720,6 +979,15 @@ void PantallaJuego::actualizarJuego(){
 
     revisarRescates();
     revisarRecoleccionCombustible();
+    revisarColisionEstructura();
+    if (estado != EstadoJuego::Jugando) {
+        return;
+    }
+
+    revisarColisionesDisparos();
+    if (estado != EstadoJuego::Jugando) {
+        return;
+    }
 
     // Sin combustible, el helicoptero se queda sin poder de vuelo:
     // se cuenta como derrota, igual que chocar contra el suelo.
@@ -728,7 +996,12 @@ void PantallaJuego::actualizarJuego(){
         return;
     }
 
-    if (distanciaRecorrida >= distanciaMeta) {
+    bool puedeTerminar = true;
+    if(usaEstructuraBloqueadora() == true && estructura != nullptr && estructura->estaDestruida() == false){
+        puedeTerminar = false;
+    }
+
+    if (distanciaRecorrida >= distanciaMeta && puedeTerminar == true) {
         finalizarJuego(EstadoJuego::Victoria);
         return;
     }
@@ -768,6 +1041,9 @@ void PantallaJuego::keyPressEvent(QKeyEvent *event){
     case Qt::Key_D:
         helicoptero->setDerecha(true);
         break;
+    case Qt::Key_Space:
+        teclaEspacioPresionada = true;
+        break;
     }
     QWidget::keyPressEvent(event);
 }
@@ -792,6 +1068,9 @@ void PantallaJuego::keyReleaseEvent(QKeyEvent *event){
     case Qt::Key_Right:
     case Qt::Key_D:
         helicoptero->setDerecha(false);
+        break;
+    case Qt::Key_Space:
+        teclaEspacioPresionada = false;
         break;
     }
     QWidget::keyReleaseEvent(event);

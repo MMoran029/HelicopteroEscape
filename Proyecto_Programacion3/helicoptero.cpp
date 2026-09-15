@@ -9,9 +9,12 @@ Helicoptero::Helicoptero()
     subiendo(false), bajando(false), izquierda(false), derecha(false),
     angulo(0), enSuelo(false)
 {
-    // El sprite ya viene orientado hacia la derecha (direccion de
-    // avance del jugador), asi que se usa tal cual, sin reflejar.
-    imagen = QPixmap(":/imagenes/Imagenes/H_Jugador.png");
+    cargarImagen(":/imagenes/Imagenes/H_Jugador.png");
+}
+
+void Helicoptero::cargarImagen(const QString &ruta)
+{
+    imagen = QPixmap(ruta);
 
     const qreal ANCHO_OBJETIVO = 84.0;
     if (imagen.height() > 0) {
@@ -64,7 +67,16 @@ void Helicoptero::aterrizarSobre(qreal nuevaX, qreal nuevaY)
     velocidadY = 0; // se detiene la caida en seco, como si tocara una superficie solida
 }
 
-void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
+void Helicoptero::setConArmas(bool valor)
+{
+    if(valor == true){
+        cargarImagen(":/imagenes/Imagenes/H_Jugador_Armas.png");
+    } else {
+        cargarImagen(":/imagenes/Imagenes/H_Jugador.png");
+    }
+}
+
+void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena, qreal fuerzaExternaX, qreal fuerzaExternaY)
 {
     if (subiendo) {
         velocidadY -= aceleracionSubida;
@@ -73,8 +85,6 @@ void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
     } else {
         velocidadY += gravedad;
     }
-
-    velocidadY = std::max(-6.0, std::min(velocidadY, 6.0));
 
     if (izquierda) {
         velocidadX -= aceleracionHorizontal;
@@ -88,6 +98,13 @@ void Helicoptero::actualizarFisica(int anchoEscena, int altoEscena)
         }
     }
 
+    // El empuje externo se suma despues del frenado normal, para que
+    // sea un arrastre constante que el jugador deba contrarrestar con
+    // los controles en vez de que la friccion lo cancele sola.
+    velocidadX += fuerzaExternaX;
+    velocidadY += fuerzaExternaY;
+
+    velocidadY = std::max(-6.0, std::min(velocidadY, 6.0));
     velocidadX = std::max(-8.0, std::min(velocidadX, 8.0));
 
     qreal nuevaY = y() + velocidadY;

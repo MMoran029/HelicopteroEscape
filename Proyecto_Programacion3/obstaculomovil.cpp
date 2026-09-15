@@ -1,12 +1,15 @@
 #include "obstaculomovil.h"
 #include <cmath>
 
-QPixmap ObstaculoMovil::obtenerImagen(){
+QPixmap ObstaculoMovil::obtenerImagen(bool conArmas){
+    if(conArmas == true){
+        return QPixmap(":/imagenes/Imagenes/H_Enemigo_Armas.png");
+    }
     return QPixmap(":/imagenes/Imagenes/H_Enemigo.png");
 }
 
-qreal ObstaculoMovil::calcularAncho(qreal alto){
-    QPixmap referencia = obtenerImagen();
+qreal ObstaculoMovil::calcularAncho(qreal alto, bool conArmas){
+    QPixmap referencia = obtenerImagen(conArmas);
     if (referencia.height() == 0) {
         return alto;
     }
@@ -15,14 +18,18 @@ qreal ObstaculoMovil::calcularAncho(qreal alto){
 }
 
 ObstaculoMovil::ObstaculoMovil(qreal posX, qreal posY, qreal ancho, qreal alto,
-                               qreal amplitud, qreal velocidadVertical)
+                               qreal amplitud, qreal velocidadVertical, bool conArmas)
     : Obstaculo(posX, posY, ancho, alto),
     posYInicial(posY),
     amplitud(amplitud),
     velocidadVertical(velocidadVertical),
-    anguloOscilacion(0)
+    anguloOscilacion(0),
+    conArmas(conArmas)
 {
-    imagen = obtenerImagen();
+    // El sprite ya viene orientado hacia la izquierda (direccion real
+    // de vuelo de los enemigos, que se desplazan por el scroll), asi
+    // que se usa tal cual, sin reflejar.
+    imagen = obtenerImagen(conArmas);
 }
 
 void ObstaculoMovil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

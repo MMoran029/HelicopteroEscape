@@ -13,6 +13,8 @@
 #include "obstaculomovil.h"
 #include "civil.h"
 #include "bidon.h"
+#include "disparo.h"
+#include "estructurabloqueadora.h"
 #include "panelresultado.h"
 
 class QGraphicsPixmapItem;
@@ -70,6 +72,30 @@ protected:
     // esta volando. Sube con el nivel.
     virtual double obtenerConsumoCombustible() const;
 
+    // ---- Ganchos de armas / estructura / empuje (Nivel 2 y 3) ----
+    // Base = comportamiento del Nivel 1: sin armas, sin empuje, sin
+    // estructura bloqueadora. Nivel2/Nivel3 sobreescriben lo que
+    // necesiten.
+    virtual bool jugadorTieneArmas() const { return false; }
+    virtual double probabilidadEnemigoArmado() const { return 0.0; }
+    virtual double probabilidadDisparoEnemigoPorFrame() const { return 1.0 / 150.0; }
+    virtual bool usaEstructuraBloqueadora() const { return false; }
+
+    // Fuerza externa constante que empuja al helicoptero cada frame
+    // (por ejemplo el viento del Nivel 2). Base = sin empuje.
+    virtual void obtenerFuerzaEmpuje(qreal &fuerzaX, qreal &fuerzaY) const {
+        fuerzaX = 0.0;
+        fuerzaY = 0.0;
+    }
+
+    // Aplica el sprite correcto (con o sin armas) al helicoptero segun
+    // jugadorTieneArmas(). Los constructores de Nivel2/Nivel3 deben
+    // llamarla ellos mismos DESPUES de que termine el constructor base
+    // (llamar a un virtual desde el constructor de PantallaJuego no
+    // funcionaria: en ese momento el objeto todavia es de tipo
+    // PantallaJuego y no se puede saber aun que el nivel es 2 o 3).
+    void actualizarSpriteJugador();
+
 private:
     QGraphicsScene *escena;
     QGraphicsView *vista;
@@ -104,11 +130,30 @@ private:
     int numBidones;
     int capacidadBidones;
 
+    // ---- Arreglo dinamico de disparos (mismo patron) ----
+    Disparo **disparos;
+    int numDisparos;
+    int capacidadDisparos;
+
+    // ---- Estructura bloqueadora (una sola por nivel, Nivel 2 y 3) ----
+    EstructuraBloqueadora *estructura;
+    bool estructuraGenerada;
+
+    // ---- Control de disparo del jugador ----
+    bool teclaEspacioPresionada;
+    int contadorEnfriamientoDisparo;
+
+    // Frames de invulnerabilidad tras chocar contra la estructura
+    // bloqueadora, para que no pierda varias vidas de golpe mientras
+    // sigue tocandola.
+    int contadorInvulnerable;
+
     // ---- Estado de la partida ----
     int vidas;
     int civilesRescatados;
     int civilesTotalNivel;
     int civilesPerdidos;
+    int puntos;
     qreal distanciaRecorrida;
     qreal distanciaMeta;
     qreal velocidadScroll;
@@ -141,6 +186,7 @@ private:
     void generarEnemigo();
     Civil* generarCivilesSobreEdificio(qreal posXEdificio, qreal topYEdificio);
     void generarBidon();
+    void generarEstructura();
 
     // Revisa si una posicion Y (con cierto alto) se solapa con un
     // edificio recien generado (o su grupo de civiles encima). La usa
@@ -151,23 +197,33 @@ private:
     void agregarObstaculo(Obstaculo *obs);
     void agregarCivil(Civil *civil);
     void agregarBidon(Bidon *bidon);
+    void agregarDisparo(Disparo *disparo);
+
+    void dispararJugador();
+    void dispararEnemigos();
 
     void actualizarObstaculos();
     void actualizarCiviles();
     void actualizarBidones();
     void actualizarCombustible();
     void actualizarPiso();
+    void actualizarDisparos();
+    void actualizarEstructura();
 
     void eliminarObstaculosFuera();
     void eliminarCivilesFuera();
     void eliminarBidonesFuera();
+    void eliminarDisparosFuera();
     void eliminarObstaculoEnIndice(int indice);
     void eliminarCivilEnIndice(int indice);
     void eliminarBidonEnIndice(int indice);
+    void eliminarDisparoEnIndice(int indice);
 
     void revisarColisiones();
     void revisarRescates();
     void revisarRecoleccionCombustible();
+    void revisarColisionesDisparos();
+    void revisarColisionEstructura();
     void actualizarHUD();
     void actualizarHUDCombustible();
 

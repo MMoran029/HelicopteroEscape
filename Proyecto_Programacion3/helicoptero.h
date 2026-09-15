@@ -16,7 +16,17 @@ public:
     void setBajando(bool valor);
     void setIzquierda(bool valor);
     void setDerecha(bool valor);
-    void actualizarFisica(int anchoEscena, int altoEscena);
+
+    // fuerzaExternaX/Y: empuje constante que no depende del jugador
+    // (por ejemplo el viento del Nivel 2). Se suma despues del frenado
+    // normal, asi que el jugador tiene que contrarrestarlo activamente
+    // con los controles en vez de que la friccion lo cancele solo.
+    void actualizarFisica(int anchoEscena, int altoEscena, qreal fuerzaExternaX = 0.0, qreal fuerzaExternaY = 0.0);
+
+    // Cambia el sprite a la variante con armas (Nivel 2 y 3) o sin
+    // armas (Nivel 1). Se llama una sola vez al armar la pantalla del
+    // nivel, no cada frame.
+    void setConArmas(bool valor);
 
     double getVelocidadY() const { return velocidadY; }
     double getVelocidadX() const { return velocidadX; }
@@ -32,6 +42,8 @@ public:
     void aterrizarSobre(qreal nuevaX, qreal nuevaY);
 
 private:
+    void cargarImagen(const QString &ruta);
+
     double velocidadY;
     double velocidadX;
     double aceleracionSubida;
