@@ -20,6 +20,7 @@ SOURCES += \
     obstaculoestatico.cpp \
     obstaculomovil.cpp \
     panelresultado.cpp \
+    pantalla_inicio_sesion.cpp \
     pantallainstrucciones.cpp \
     pantallajuego.cpp \
     pantallamisiones.cpp
@@ -38,6 +39,7 @@ HEADERS += \
     obstaculoestatico.h \
     obstaculomovil.h \
     panelresultado.h \
+    pantalla_inicio_sesion.h \
     pantallainstrucciones.h \
     pantallajuego.h \
     pantallamisiones.h
