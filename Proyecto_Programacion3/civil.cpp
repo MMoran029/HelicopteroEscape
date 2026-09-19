@@ -5,7 +5,7 @@ using namespace std;
 
 Civil::Civil(qreal posX, qreal posY, int cantidadPersonas)
     : rescatado(false), activo(true), aplastado(false), puntosRescate(100 * cantidadPersonas),
-    cantidadPersonas(cantidadPersonas), tiempoParpadeo(0){
+    cantidadPersonas(cantidadPersonas), tiempoParpadeo(0), contadorRescate(0){
     setPos(posX, posY);
 
     imagen = obtenerImagen(cantidadPersonas);
@@ -32,9 +32,9 @@ QPixmap Civil::obtenerImagen(int cantidadPersonas){
 }
 
 QRectF Civil::boundingRect() const{
-    return QRectF(-anchoImagen / 2, -altoImagen / 2, anchoImagen, altoImagen);
+    const qreal MARGEN_CAJA = 6.0;
+    return QRectF(-anchoImagen / 2 - MARGEN_CAJA, -altoImagen / 2 - MARGEN_CAJA,anchoImagen + MARGEN_CAJA * 2, altoImagen + MARGEN_CAJA * 2);
 }
-
 void Civil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -51,6 +51,21 @@ void Civil::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     }
 
     painter->drawPixmap(destino.toRect(), imagen);
+    if(estaSiendoRescatado()==true){
+        QColor colorCaja;
+
+        if(contadorRescate < FRAMES_PARA_RESCATE / 3){
+            colorCaja = QColor(255, 140, 0); // color naranja
+        }else if(contadorRescate < (FRAMES_PARA_RESCATE * 2) / 3){
+            colorCaja = QColor(255, 220, 0); //color amarillo
+        }else{
+            colorCaja = QColor(90, 220, 90); // color verde
+        }
+
+        painter->setPen(QPen(colorCaja, 3));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(destino.adjusted(-3, -3, 3, 3), 6, 6); //aqui se crea la cajita alrededor del civil
+    }
 
     if (rescatado == true) {
         // Contorno verde de confirmacion (visible el ultimo frame antes
@@ -98,6 +113,28 @@ bool Civil::verificarCercania(qreal helicX, qreal helicY, qreal distanciaMax){
     double dy = helicY - y();
     double distancia = sqrt(dx * dx + dy * dy);
     if(distancia < distanciaMax){
+        return true;
+    }
+    return false;
+}
+
+void Civil::actualizarRescate(bool helicopteroCerca){
+    if(activo==false || rescatado==true || aplastado==true){
+        return;
+    }
+
+    if(helicopteroCerca==true){
+        contadorRescate++;
+        if(contadorRescate >= FRAMES_PARA_RESCATE){//si se cumplen los 1.5 segundos se rescatara los o el civil
+            rescatar();
+        }
+    }else{
+        contadorRescate = 0;
+    }
+}
+
+bool Civil::estaSiendoRescatado() const{
+    if(contadorRescate > 0 && rescatado == false && aplastado == false){
         return true;
     }
     return false;

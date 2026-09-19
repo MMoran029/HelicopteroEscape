@@ -16,6 +16,7 @@ SOURCES += \
     helicoptero.cpp \
     menuprincipal.cpp \
     nivel2.cpp \
+    nivel3.cpp \
     obstaculo.cpp \
     obstaculoestatico.cpp \
     obstaculomovil.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     helicoptero.h \
     menuprincipal.h \
     nivel2.h \
+    nivel3.h \
     obstaculo.h \
     obstaculoestatico.h \
     obstaculomovil.h \

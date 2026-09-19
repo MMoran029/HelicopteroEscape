@@ -103,6 +103,8 @@ private:
     Helicoptero *helicoptero;
     QGraphicsPixmapItem *piso1;
     QGraphicsPixmapItem *piso2;
+    QGraphicsPixmapItem *fondo1;
+    QGraphicsPixmapItem *fondo2;
     QLabel *hud;
     QLabel *hudCombustible;
     PanelResultado *panelResultado;
@@ -207,6 +209,7 @@ private:
     void actualizarBidones();
     void actualizarCombustible();
     void actualizarPiso();
+    void actualizarFondo();
     void actualizarDisparos();
     void actualizarEstructura();
 

@@ -20,7 +20,8 @@ public:
     void aplastar();
     void desactivar();
     bool verificarCercania(qreal helicX, qreal helicY, qreal distanciaMax);
-
+    void actualizarRescate(bool helicopteroCerca);
+    bool estaSiendoRescatado() const;
     // Se llama cada frame: desplaza al civil junto con el scroll del
     // escenario para que se mantenga "parado" sobre su edificio.
     void actualizar(qreal velocidadScroll);
@@ -43,8 +44,9 @@ private:
     bool aplastado;
     int puntosRescate;
     int cantidadPersonas;
+    int contadorRescate;
     double tiempoParpadeo;
-
+    static const int FRAMES_PARA_RESCATE = 45; //al rededor de unos 1.5 segundos tardara el helicoptero en rescatar
     QPixmap imagen;
     qreal anchoImagen;
     qreal altoImagen;

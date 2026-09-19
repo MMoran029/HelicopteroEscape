@@ -40,7 +40,7 @@ public:
     // el techo de un edificio), deteniendo su caida en seco. La usa
     // PantallaJuego cuando detecta un aterrizaje seguro (sin choque).
     void aterrizarSobre(qreal nuevaX, qreal nuevaY);
-
+    void reiniciarFisica(); //para evitar ser lanzado a la hora de iniciar de nuevo una partida
 private:
     void cargarImagen(const QString &ruta);
 

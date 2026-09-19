@@ -13,17 +13,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     configurarMenu();
     configurarJuego();
     configurarNivel2();
+    configurarNivel3();    stack->setCurrentIndex(0);
     configurarInstrucciones();
     configurarMisiones();
-
     // El orden de insercion define el indice de cada pantalla en el stack:
     // 0 = menu, 1 = juego (Mision 1), 2 = instrucciones, 3 = misiones,
-    // 4 = Nivel 2.
+    // 4 = Nivel 2, 5 = Nivel 3.
     stack->addWidget(menu);
     stack->addWidget(pantallaJuego);
     stack->addWidget(pantallaInstrucciones);
     stack->addWidget(pantallaMisiones);
     stack->addWidget(pantallaNivel2);
+    stack->addWidget(pantallaNivel3);
     stack->setCurrentIndex(0);
 
     connect(menu, &MenuPrincipal::jugarPresionado, this, &MainWindow::irAJuego);
@@ -48,6 +49,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     connect(pantallaNivel2, &PantallaJuego::solicitaMenu, this, &MainWindow::irAMenu);
     connect(pantallaNivel2, &PantallaJuego::solicitaMisiones, this, &MainWindow::irAMisiones);
     connect(pantallaNivel2, &PantallaJuego::solicitaSiguienteNivel, this, &MainWindow::siguienteNivelSolicitado);
+
+    // El Nivel 3 usa las mismas señales (heredadas de PantallaJuego).
+    connect(pantallaNivel3, &PantallaJuego::solicitaMenu, this, &MainWindow::irAMenu);
+    connect(pantallaNivel3, &PantallaJuego::solicitaMisiones, this, &MainWindow::irAMisiones);
+    connect(pantallaNivel3, &PantallaJuego::solicitaSiguienteNivel, this, &MainWindow::siguienteNivelSolicitado);
 }
 
 MainWindow::~MainWindow(){
@@ -63,6 +69,10 @@ void MainWindow::configurarJuego(){
 
 void MainWindow::configurarNivel2(){
     pantallaNivel2 = new Nivel2(this);
+}
+
+void MainWindow::configurarNivel3(){
+    pantallaNivel3 = new Nivel3(this);
 }
 
 void MainWindow::configurarInstrucciones(){
@@ -109,8 +119,9 @@ void MainWindow::mision2Elegida(){
 }
 
 void MainWindow::mision3Elegida(){
-    // RECORDATORIO: aun no existe el Nivel 3 (Base Enemiga bajo Tormenta).
-    cout << "Mision 3 seleccionada: nivel aun no implementado" << endl;
+    pantallaNivel3->reiniciarNivel();
+    stack->setCurrentIndex(5);
+    pantallaNivel3->setFocus();
 }
 
 void MainWindow::siguienteNivelSolicitado(){
@@ -122,11 +133,14 @@ void MainWindow::siguienteNivelSolicitado(){
         return;
     }
 
-    // RECORDATORIO: aun no existe el Nivel 3 (Base Enemiga bajo
-    // Tormenta). Mientras tanto, terminar el Nivel 2 reinicia el
-    // Nivel 2.
-    cout << "Nivel 3 aun no implementado, reiniciando Nivel 2" << endl;
-    pantallaNivel2->reiniciarNivel();
-    stack->setCurrentIndex(4);
-    pantallaNivel2->setFocus();
+    if(sender() == pantallaNivel2){
+        // Se completo el Nivel 2: se pasa al Nivel 3.
+        pantallaNivel3->reiniciarNivel();
+        stack->setCurrentIndex(5);
+        pantallaNivel3->setFocus();
+        return;
+    }
+
+    // Se completo el Nivel 3 (el ultimo por ahora): se vuelve a la
+    stack->setCurrentIndex(3);
 }

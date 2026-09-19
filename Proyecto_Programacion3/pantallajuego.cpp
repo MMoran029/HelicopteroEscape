@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-
+using namespace std;
 PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
     nivelJuego(nivelJuego),
     obstaculos(nullptr), numObstaculos(0), capacidadObstaculos(0),
@@ -56,16 +56,27 @@ PantallaJuego::~PantallaJuego(){
 void PantallaJuego::configurarEscena(){
     escena = new QGraphicsScene(0, 0, ANCHO_ESCENA, ALTO_ESCENA, this);
     escena->setBackgroundBrush(QBrush(QColor(30, 30, 60)));
-
     vista = new QGraphicsView(escena, this);
     vista->setRenderHint(QPainter::Antialiasing);
     vista->setRenderHint(QPainter::SmoothPixmapTransform);
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
+    escena->setItemIndexMethod(QGraphicsScene::NoIndex);
+    vista->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     // Franja de piso: dos copias encadenadas para simular scroll
     // infinito. Cuando una sale completamente de la vista por la
     // izquierda, se reubica pegada detras de la otra.
+    QPixmap fondoOriginal(":/imagenes/Imagenes/fondo.png");
+    QPixmap fondoEscalado = fondoOriginal.scaled(ANCHO_ESCENA, ALTO_ESCENA,
+                                                 Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    fondo1 = escena->addPixmap(fondoEscalado);
+    fondo1->setPos(0, 0);
+    fondo1->setZValue(-2);
+
+    fondo2 = escena->addPixmap(fondoEscalado);
+    fondo2->setPos(ANCHO_ESCENA, 0);
+    fondo2->setZValue(-2);
+
     QPixmap pisoOriginal(":/imagenes/Imagenes/Piso.png");
     QPixmap pisoEscalado = pisoOriginal.scaled(ANCHO_ESCENA, ALTURA_SUELO,
                                                Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -582,6 +593,17 @@ void PantallaJuego::actualizarPiso(){
         piso2->setPos(piso1->x() + ANCHO_ESCENA, piso2->y());
     }
 }
+void PantallaJuego::actualizarFondo(){
+    fondo1->setPos(fondo1->x() - velocidadScroll, fondo1->y());
+    fondo2->setPos(fondo2->x() - velocidadScroll, fondo2->y());
+
+    if(fondo1->x() <= -ANCHO_ESCENA){
+        fondo1->setPos(fondo2->x() + ANCHO_ESCENA, fondo1->y());
+    }
+    if(fondo2->x() <= -ANCHO_ESCENA){
+        fondo2->setPos(fondo1->x() + ANCHO_ESCENA, fondo2->y());
+    }
+}
 
 void PantallaJuego::revisarColisiones(){
     const qreal TOLERANCIA_ATERRIZAJE = 12.0;      // penetracion maxima que se considera "aterrizaje", no choque
@@ -665,10 +687,14 @@ void PantallaJuego::revisarRescates(){
                 civiles[i]->aplastar();
                 civilesPerdidos += civiles[i]->getCantidadPersonas();
                 puntos -= 100 * civiles[i]->getCantidadPersonas();
-            } else if (civiles[i]->verificarCercania(helicX, helicY, DISTANCIA_RESCATE)) {
-                civiles[i]->rescatar();
-                civilesRescatados += civiles[i]->getCantidadPersonas();
-                puntos += 100 * civiles[i]->getCantidadPersonas();
+            }else{
+                bool cerca = civiles[i]->verificarCercania(helicX, helicY, DISTANCIA_RESCATE); //ahora cuando nos acerquemos al civil empezara un timer, (cuenta frames)
+                civiles[i]->actualizarRescate(cerca);                                          //pero a segundos son 1.5, hasta que termine se rescatara el civil
+
+                if(civiles[i]->estaRescatado() == true){//en el mismo frame que rescatamos, activo=false, asi evitamos que nos sume tantos puntos
+                    civilesRescatados += civiles[i]->getCantidadPersonas();
+                    puntos += 100 * civiles[i]->getCantidadPersonas();
+                }
             }
         }
     }
@@ -825,14 +851,21 @@ void PantallaJuego::actualizarHUDCombustible(){
 }
 
 int PantallaJuego::obtenerIntervaloBidon() const{
+    if(nivelJuego == 3){
+        // El nivel 3 ya gasta mas combustible por frame (formula de
+        // obtenerConsumoCombustible) y el viento hace mas lento llegar
+        // a cada bidon, asi que aqui se rompe el patron de "menos
+        // bidones segun sube el nivel" y se dejan aparecer mas seguido.
+        return 220;
+    }
+
+
     // Menos bidones a medida que sube el nivel: el intervalo crece,
     // asi aparecen con menos frecuencia.
     return 280 + (nivelJuego - 1) * 140;
 }
 
 double PantallaJuego::obtenerConsumoCombustible() const{
-    // Consumo por frame. Sube un poco con el nivel para que administrar
-    // el combustible sea mas exigente en niveles avanzados.
     return 0.045 + (nivelJuego - 1) * 0.015;
 }
 
@@ -862,6 +895,7 @@ void PantallaJuego::reiniciarNivel(){
     helicoptero->setBajando(false);
     helicoptero->setIzquierda(false);
     helicoptero->setDerecha(false);
+    helicoptero->reiniciarFisica();
 
     vidas = 3;
     civilesRescatados = 0;
@@ -963,6 +997,7 @@ void PantallaJuego::actualizarJuego(){
     actualizarCiviles();
     actualizarBidones();
     actualizarCombustible();
+    actualizarFondo();
     actualizarPiso();
     actualizarDisparos();
     actualizarEstructura();

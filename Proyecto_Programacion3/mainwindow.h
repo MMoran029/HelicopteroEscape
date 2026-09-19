@@ -5,6 +5,7 @@
 #include "menuprincipal.h"
 #include "pantallajuego.h"
 #include "nivel2.h"
+#include "nivel3.h"
 #include "pantallainstrucciones.h"
 #include "pantallamisiones.h"
 
@@ -30,16 +31,15 @@ private:
     MenuPrincipal *menu;
     PantallaJuego *pantallaJuego;
     Nivel2 *pantallaNivel2;
+    Nivel3 *pantallaNivel3;
     PantallaInstrucciones *pantallaInstrucciones;
     PantallaMisiones *pantallaMisiones;
 
     void configurarMenu();
     void configurarJuego();
     void configurarNivel2();
+    void configurarNivel3();
     void configurarInstrucciones();
     void configurarMisiones();
-
-    // RECORDATORIO: mision3Elegida() queda como marcador de posicion
-    // hasta que exista el Nivel 3.
 };
 #endif // MAINWINDOW_H

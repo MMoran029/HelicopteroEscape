@@ -12,6 +12,13 @@ Helicoptero::Helicoptero()
     cargarImagen(":/imagenes/Imagenes/H_Jugador.png");
 }
 
+void Helicoptero::reiniciarFisica(){
+    velocidadY = 0;
+    velocidadX = 0;
+    angulo = 0;
+    enSuelo = false;
+}
+
 void Helicoptero::cargarImagen(const QString &ruta)
 {
     imagen = QPixmap(ruta);
