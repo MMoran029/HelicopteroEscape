@@ -8,6 +8,15 @@
 #include <ctime>
 #include <cmath>
 using namespace std;
+
+// Solape entre las dos copias encadenadas del fondo y del piso. Tapa la
+// costura de 1px que deja el filtrado (SmoothPixmapTransform) justo en la
+// union de ambas copias: sin solape, esa linea se pasea de derecha a
+// izquierda con el scroll y en pantalla completa (escalado grande) se ve
+// como un parpadeo, sobre todo al llegar al borde izquierdo cuando se
+// recicla. Las copias se colocan y reciclan cada
+// (ANCHO_ESCENA - SOLAPE_TILES) en vez de cada ANCHO_ESCENA.
+static const qreal SOLAPE_TILES = 3.0;
 PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
     nivelJuego(nivelJuego),
     obstaculos(nullptr), numObstaculos(0), capacidadObstaculos(0),
@@ -86,7 +95,7 @@ void PantallaJuego::configurarEscena(){
     fondo1->setZValue(-2);
 
     fondo2 = escena->addPixmap(fondoEscalado);
-    fondo2->setPos(ANCHO_ESCENA, 0);
+    fondo2->setPos(ANCHO_ESCENA - SOLAPE_TILES, 0);
     fondo2->setZValue(-2);
 
     QPixmap pisoOriginal(":/imagenes/Imagenes/Piso.png");
@@ -97,7 +106,7 @@ void PantallaJuego::configurarEscena(){
     piso1->setZValue(-1);
 
     piso2 = escena->addPixmap(pisoEscalado);
-    piso2->setPos(ANCHO_ESCENA, ALTO_ESCENA - ALTURA_SUELO);
+    piso2->setPos(ANCHO_ESCENA - SOLAPE_TILES, ALTO_ESCENA - ALTURA_SUELO);
     piso2->setZValue(-1);
 
     helicoptero = new Helicoptero();
@@ -146,7 +155,13 @@ void PantallaJuego::ajustarVista(){
         vista->viewport()->height() <= 0) {
         return;
     }
-    vista->fitInView(escena->sceneRect(), Qt::KeepAspectRatio);
+    // IgnoreAspectRatio: la escena estira exacto al tamano del viewport,
+    // sin franjas negras laterales. Con KeepAspectRatio, en pantalla
+    // completa (mas ancha que 800x500) quedaban barras negras a los lados:
+    // el borde de la escena quedaba metido hacia adentro y los edificios
+    // "desaparecian antes de salir de la pantalla", ademas de notarse el
+    // reciclaje del fondo en el borde izquierdo de la escena.
+    vista->fitInView(escena->sceneRect(), Qt::IgnoreAspectRatio);
 }
 
 void PantallaJuego::configurarPanelResultado(){
@@ -637,22 +652,30 @@ void PantallaJuego::actualizarPiso(){
     piso1->setPos(piso1->x() - velocidadScroll, piso1->y());
     piso2->setPos(piso2->x() - velocidadScroll, piso2->y());
 
-    if(piso1->x() <= -ANCHO_ESCENA){
-        piso1->setPos(piso2->x() + ANCHO_ESCENA, piso1->y());
+    // Solo se recicla cuando el tile salio POR COMPLETO (borde derecho
+    // <= 0) y se pega detras del otro conservando el solape: asi el
+    // borde izquierdo de la escena siempre queda cubierto y no se ve
+    // ninguna franja sin piso al momento del reciclaje.
+    if(piso1->x() + ANCHO_ESCENA <= 0){
+        piso1->setPos(piso2->x() + ANCHO_ESCENA - SOLAPE_TILES, piso1->y());
     }
-    if(piso2->x() <= -ANCHO_ESCENA){
-        piso2->setPos(piso1->x() + ANCHO_ESCENA, piso2->y());
+    if(piso2->x() + ANCHO_ESCENA <= 0){
+        piso2->setPos(piso1->x() + ANCHO_ESCENA - SOLAPE_TILES, piso2->y());
     }
 }
 void PantallaJuego::actualizarFondo(){
     fondo1->setPos(fondo1->x() - velocidadScroll, fondo1->y());
     fondo2->setPos(fondo2->x() - velocidadScroll, fondo2->y());
 
-    if(fondo1->x() <= -ANCHO_ESCENA){
-        fondo1->setPos(fondo2->x() + ANCHO_ESCENA, fondo1->y());
+    // Igual que el piso: reciclar solo al salir por completo y
+    // manteniendo el solape, para que no aparezca ni una franja de 1px
+    // sin fondo en el borde izquierdo (en pantalla completa ese hueco
+    // escalado se nota como un parpadeo).
+    if(fondo1->x() + ANCHO_ESCENA <= 0){
+        fondo1->setPos(fondo2->x() + ANCHO_ESCENA - SOLAPE_TILES, fondo1->y());
     }
-    if(fondo2->x() <= -ANCHO_ESCENA){
-        fondo2->setPos(fondo1->x() + ANCHO_ESCENA, fondo2->y());
+    if(fondo2->x() + ANCHO_ESCENA <= 0){
+        fondo2->setPos(fondo1->x() + ANCHO_ESCENA - SOLAPE_TILES, fondo2->y());
     }
 }
 

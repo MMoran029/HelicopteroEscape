@@ -25,5 +25,11 @@ void Obstaculo::actualizar(qreal velocidadScroll, int altoEscena)
 
 bool Obstaculo::fueraDePantalla() const
 {
-    return (x() + ancho / 2) < 0;
+    // Margen extra: se elimina solo cuando el borde derecho ya quedo
+    // varios pixeles mas alla del borde izquierdo de la escena. Sin este
+    // margen, el redondeo del dibujado escalado (boundingRect().toRect()
+    // + SmoothPixmapTransform) hace que el sprite parezca desvanecerse
+    // antes de terminar de salir, muy notorio en pantalla completa.
+    static const qreal MARGEN_SALIDA = 10.0;
+    return (x() + ancho / 2) < -MARGEN_SALIDA;
 }
