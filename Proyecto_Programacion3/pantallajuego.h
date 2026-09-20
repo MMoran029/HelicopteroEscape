@@ -41,6 +41,11 @@ public:
     // siempre arranque una partida nueva.
     void reiniciarNivel();
 
+    // Puntaje y nivel actuales. Los usa MainWindow para guardar el
+    // record del usuario (USUARIOS/<nombre>/datos.txt) al terminar.
+    int puntajeActual() const { return puntos; }
+    int numeroNivel() const { return nivelJuego; }
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -53,6 +58,9 @@ signals:
     void solicitaMenu();
     void solicitaMisiones();
     void solicitaSiguienteNivel();
+    // Se emite al terminar la partida (victoria o derrota) con el
+    // nivel jugado y los puntos conseguidos, para el ranking.
+    void partidaTerminada(int nivel, int puntos, bool victoria);
 
 private slots:
     void actualizarJuego();

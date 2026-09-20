@@ -3,6 +3,7 @@ debug/civil.o
 debug/crearboton.o
 debug/disparo.o
 debug/estructurabloqueadora.o
+debug/gestorusuarios.o
 debug/main.o
 debug/mainwindow.o
 debug/helicoptero.o
@@ -17,6 +18,7 @@ debug/pantalla_inicio_sesion.o
 debug/pantallainstrucciones.o
 debug/pantallajuego.o
 debug/pantallamisiones.o
+debug/pantallaranking.o
 debug/qrc_recursos.o
 debug/moc_crearboton.o
 debug/moc_mainwindow.o
@@ -26,3 +28,4 @@ debug/moc_pantalla_inicio_sesion.o
 debug/moc_pantallainstrucciones.o
 debug/moc_pantallajuego.o
 debug/moc_pantallamisiones.o
+debug/moc_pantallaranking.o

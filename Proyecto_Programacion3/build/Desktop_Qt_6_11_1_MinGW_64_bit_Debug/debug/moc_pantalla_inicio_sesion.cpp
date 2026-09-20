@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "../../../pantalla_inicio_sesion.h"
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -39,19 +40,31 @@ template <> constexpr inline auto pantalla_inicio_sesion::qt_create_metaobjectda
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "pantalla_inicio_sesion",
-        "iniciarSesionPresionado",
+        "sesionIniciada",
         "",
-        "registrarsePresionado",
-        "salirPresionado"
+        "nombreUsuario",
+        "salirPresionado",
+        "onBotonIniciarSesion",
+        "onBotonRegistrarse",
+        "onBotonAceptar",
+        "onBotonVolver"
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Signal 'iniciarSesionPresionado'
-        QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'registrarsePresionado'
-        QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'sesionIniciada'
+        QtMocHelpers::SignalData<void(const QString &)>(1, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 3 },
+        }}),
         // Signal 'salirPresionado'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'onBotonIniciarSesion'
+        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onBotonRegistrarse'
+        QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onBotonAceptar'
+        QtMocHelpers::SlotData<void()>(7, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onBotonVolver'
+        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -75,18 +88,19 @@ void pantalla_inicio_sesion::qt_static_metacall(QObject *_o, QMetaObject::Call _
     auto *_t = static_cast<pantalla_inicio_sesion *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->iniciarSesionPresionado(); break;
-        case 1: _t->registrarsePresionado(); break;
-        case 2: _t->salirPresionado(); break;
+        case 0: _t->sesionIniciada((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 1: _t->salirPresionado(); break;
+        case 2: _t->onBotonIniciarSesion(); break;
+        case 3: _t->onBotonRegistrarse(); break;
+        case 4: _t->onBotonAceptar(); break;
+        case 5: _t->onBotonVolver(); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
-        if (QtMocHelpers::indexOfMethod<void (pantalla_inicio_sesion::*)()>(_a, &pantalla_inicio_sesion::iniciarSesionPresionado, 0))
+        if (QtMocHelpers::indexOfMethod<void (pantalla_inicio_sesion::*)(const QString & )>(_a, &pantalla_inicio_sesion::sesionIniciada, 0))
             return;
-        if (QtMocHelpers::indexOfMethod<void (pantalla_inicio_sesion::*)()>(_a, &pantalla_inicio_sesion::registrarsePresionado, 1))
-            return;
-        if (QtMocHelpers::indexOfMethod<void (pantalla_inicio_sesion::*)()>(_a, &pantalla_inicio_sesion::salirPresionado, 2))
+        if (QtMocHelpers::indexOfMethod<void (pantalla_inicio_sesion::*)()>(_a, &pantalla_inicio_sesion::salirPresionado, 1))
             return;
     }
 }
@@ -110,33 +124,27 @@ int pantalla_inicio_sesion::qt_metacall(QMetaObject::Call _c, int _id, void **_a
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 6;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 6)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 3;
+        _id -= 6;
     }
     return _id;
 }
 
 // SIGNAL 0
-void pantalla_inicio_sesion::iniciarSesionPresionado()
+void pantalla_inicio_sesion::sesionIniciada(const QString & _t1)
 {
-    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+    QMetaObject::activate<void>(this, &staticMetaObject, 0, nullptr, _t1);
 }
 
 // SIGNAL 1
-void pantalla_inicio_sesion::registrarsePresionado()
-{
-    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
-}
-
-// SIGNAL 2
 void pantalla_inicio_sesion::salirPresionado()
 {
-    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
 }
 QT_WARNING_POP

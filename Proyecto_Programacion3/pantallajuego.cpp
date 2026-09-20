@@ -884,6 +884,9 @@ void PantallaJuego::finalizarJuego(EstadoJuego resultado){
 
     hud->setText(victoria ? "Escape exitoso" : "Helicoptero destruido");
     panelResultado->mostrarResultado(victoria, info);
+
+    // Avisar a MainWindow para que guarde el record del usuario.
+    emit partidaTerminada(nivelJuego, puntos, victoria);
 }
 
 void PantallaJuego::reiniciarNivel(){

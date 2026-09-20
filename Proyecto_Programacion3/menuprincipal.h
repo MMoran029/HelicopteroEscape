@@ -20,6 +20,7 @@ signals:
     void instruccionesPresionado();
     void salirPresionado();
     void misionesPresionado();
+    void rankingPresionado();
 
 private:
     QPixmap fondoMenu;
@@ -31,8 +32,5 @@ private:
 
     void configurarBotones();
     void acomodarBotones();
-
-    // RECORDATORIO: conectar botonRanking a su funcionalidad real cuando
-    // exista la tabla de ranking.
 };
 #endif // MENUPRINCIPAL_H

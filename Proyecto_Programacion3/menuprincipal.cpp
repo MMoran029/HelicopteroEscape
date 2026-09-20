@@ -24,9 +24,10 @@ void MenuPrincipal::configurarBotones(){
     botonInstrucciones->resize(200, 50);
     botonSalir->resize(200, 50);
 
-    // El boton de Ranking queda pendiente hasta que exista esa pantalla.
+    // El boton de Ranking abre la pantalla de ranking.
     connect(botonJugar, &QPushButton::clicked, this, &MenuPrincipal::jugarPresionado);
     connect(botonMisiones, &QPushButton::clicked, this, &MenuPrincipal::misionesPresionado);
+    connect(botonRanking, &QPushButton::clicked, this, &MenuPrincipal::rankingPresionado);
     connect(botonInstrucciones, &QPushButton::clicked, this, &MenuPrincipal::instruccionesPresionado);
     connect(botonSalir, &QPushButton::clicked, this, &MenuPrincipal::salirPresionado);
 }

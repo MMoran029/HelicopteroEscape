@@ -3,6 +3,7 @@ release/civil.o
 release/crearboton.o
 release/disparo.o
 release/estructurabloqueadora.o
+release/gestorusuarios.o
 release/main.o
 release/mainwindow.o
 release/helicoptero.o
@@ -17,6 +18,7 @@ release/pantalla_inicio_sesion.o
 release/pantallainstrucciones.o
 release/pantallajuego.o
 release/pantallamisiones.o
+release/pantallaranking.o
 release/qrc_recursos.o
 release/moc_crearboton.o
 release/moc_mainwindow.o
@@ -26,3 +28,4 @@ release/moc_pantalla_inicio_sesion.o
 release/moc_pantallainstrucciones.o
 release/moc_pantallajuego.o
 release/moc_pantallamisiones.o
+release/moc_pantallaranking.o

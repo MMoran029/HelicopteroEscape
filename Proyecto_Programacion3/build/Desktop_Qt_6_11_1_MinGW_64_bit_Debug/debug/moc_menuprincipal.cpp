@@ -43,7 +43,8 @@ template <> constexpr inline auto MenuPrincipal::qt_create_metaobjectdata<qt_met
         "",
         "instruccionesPresionado",
         "salirPresionado",
-        "misionesPresionado"
+        "misionesPresionado",
+        "rankingPresionado"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -55,6 +56,8 @@ template <> constexpr inline auto MenuPrincipal::qt_create_metaobjectdata<qt_met
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
         // Signal 'misionesPresionado'
         QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'rankingPresionado'
+        QtMocHelpers::SignalData<void()>(6, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -82,6 +85,7 @@ void MenuPrincipal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 1: _t->instruccionesPresionado(); break;
         case 2: _t->salirPresionado(); break;
         case 3: _t->misionesPresionado(); break;
+        case 4: _t->rankingPresionado(); break;
         default: ;
         }
     }
@@ -93,6 +97,8 @@ void MenuPrincipal::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::salirPresionado, 2))
             return;
         if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::misionesPresionado, 3))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (MenuPrincipal::*)()>(_a, &MenuPrincipal::rankingPresionado, 4))
             return;
     }
 }
@@ -116,14 +122,14 @@ int MenuPrincipal::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 5;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 5;
     }
     return _id;
 }
@@ -150,5 +156,11 @@ void MenuPrincipal::salirPresionado()
 void MenuPrincipal::misionesPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
+}
+
+// SIGNAL 4
+void MenuPrincipal::rankingPresionado()
+{
+    QMetaObject::activate(this, &staticMetaObject, 4, nullptr);
 }
 QT_WARNING_POP

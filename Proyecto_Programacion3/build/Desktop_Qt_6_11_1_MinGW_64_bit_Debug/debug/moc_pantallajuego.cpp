@@ -44,6 +44,10 @@ template <> constexpr inline auto PantallaJuego::qt_create_metaobjectdata<qt_met
         "",
         "solicitaMisiones",
         "solicitaSiguienteNivel",
+        "partidaTerminada",
+        "nivel",
+        "puntos",
+        "victoria",
         "actualizarJuego"
     };
 
@@ -54,8 +58,12 @@ template <> constexpr inline auto PantallaJuego::qt_create_metaobjectdata<qt_met
         QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
         // Signal 'solicitaSiguienteNivel'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'partidaTerminada'
+        QtMocHelpers::SignalData<void(int, int, bool)>(5, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 6 }, { QMetaType::Int, 7 }, { QMetaType::Bool, 8 },
+        }}),
         // Slot 'actualizarJuego'
-        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -82,7 +90,8 @@ void PantallaJuego::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 0: _t->solicitaMenu(); break;
         case 1: _t->solicitaMisiones(); break;
         case 2: _t->solicitaSiguienteNivel(); break;
-        case 3: _t->actualizarJuego(); break;
+        case 3: _t->partidaTerminada((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<bool>>(_a[3]))); break;
+        case 4: _t->actualizarJuego(); break;
         default: ;
         }
     }
@@ -92,6 +101,8 @@ void PantallaJuego::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)()>(_a, &PantallaJuego::solicitaMisiones, 1))
             return;
         if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)()>(_a, &PantallaJuego::solicitaSiguienteNivel, 2))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (PantallaJuego::*)(int , int , bool )>(_a, &PantallaJuego::partidaTerminada, 3))
             return;
     }
 }
@@ -115,14 +126,14 @@ int PantallaJuego::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 5;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 5;
     }
     return _id;
 }
@@ -143,5 +154,11 @@ void PantallaJuego::solicitaMisiones()
 void PantallaJuego::solicitaSiguienteNivel()
 {
     QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+}
+
+// SIGNAL 3
+void PantallaJuego::partidaTerminada(int _t1, int _t2, bool _t3)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 3, nullptr, _t1, _t2, _t3);
 }
 QT_WARNING_POP

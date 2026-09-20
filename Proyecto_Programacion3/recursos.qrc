@@ -3,6 +3,8 @@
         <file alias="menu_principal.png">imagenes/menu_principal.png</file>
         <file>Imagenes/instrucciones.png</file>
         <file>Imagenes/inicio_sesion.png</file>
+        <file>Imagenes/registrarse.png</file>
+        <file>Imagenes/ranking.png</file>
         <file>Imagenes/pantallamisiones.png</file>
         <file>Imagenes/Edificio_1.png</file>
         <file>Imagenes/Edificio_2.png</file>

@@ -11,6 +11,7 @@ SOURCES += \
     crearboton.cpp \
     disparo.cpp \
     estructurabloqueadora.cpp \
+    gestorusuarios.cpp \
     main.cpp \
     mainwindow.cpp \
     helicoptero.cpp \
@@ -24,7 +25,8 @@ SOURCES += \
     pantalla_inicio_sesion.cpp \
     pantallainstrucciones.cpp \
     pantallajuego.cpp \
-    pantallamisiones.cpp
+    pantallamisiones.cpp \
+    pantallaranking.cpp
 
 HEADERS += \
     bidon.h \
@@ -32,6 +34,7 @@ HEADERS += \
     crearboton.h \
     disparo.h \
     estructurabloqueadora.h \
+    gestorusuarios.h \
     mainwindow.h \
     helicoptero.h \
     menuprincipal.h \
@@ -44,7 +47,9 @@ HEADERS += \
     pantalla_inicio_sesion.h \
     pantallainstrucciones.h \
     pantallajuego.h \
-    pantallamisiones.h
+    pantallamisiones.h \
+    pantallaranking.h
 
 RESOURCES += \
+    recursos.qrc \
     recursos.qrc
