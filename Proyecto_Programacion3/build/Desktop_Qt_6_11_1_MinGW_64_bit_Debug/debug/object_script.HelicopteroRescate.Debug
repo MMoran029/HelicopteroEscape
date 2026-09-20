@@ -11,6 +11,7 @@ debug/helicoptero.o
 debug/menuprincipal.o
 debug/nivel2.o
 debug/nivel3.o
+debug/nivelextra.o
 debug/obstaculo.o
 debug/obstaculoestatico.o
 debug/obstaculomovil.o

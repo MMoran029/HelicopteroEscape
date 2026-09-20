@@ -43,6 +43,7 @@ template <> constexpr inline auto PantallaMisiones::qt_create_metaobjectdata<qt_
         "",
         "mision2Presionado",
         "mision3Presionado",
+        "misionExtraPresionado",
         "volverPresionado"
     };
 
@@ -53,8 +54,10 @@ template <> constexpr inline auto PantallaMisiones::qt_create_metaobjectdata<qt_
         QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
         // Signal 'mision3Presionado'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
-        // Signal 'volverPresionado'
+        // Signal 'misionExtraPresionado'
         QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'volverPresionado'
+        QtMocHelpers::SignalData<void()>(6, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -81,7 +84,8 @@ void PantallaMisiones::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         case 0: _t->mision1Presionado(); break;
         case 1: _t->mision2Presionado(); break;
         case 2: _t->mision3Presionado(); break;
-        case 3: _t->volverPresionado(); break;
+        case 3: _t->misionExtraPresionado(); break;
+        case 4: _t->volverPresionado(); break;
         default: ;
         }
     }
@@ -92,7 +96,9 @@ void PantallaMisiones::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
             return;
         if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::mision3Presionado, 2))
             return;
-        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::volverPresionado, 3))
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::misionExtraPresionado, 3))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (PantallaMisiones::*)()>(_a, &PantallaMisiones::volverPresionado, 4))
             return;
     }
 }
@@ -116,14 +122,14 @@ int PantallaMisiones::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 5;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 4)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 4;
+        _id -= 5;
     }
     return _id;
 }
@@ -147,8 +153,14 @@ void PantallaMisiones::mision3Presionado()
 }
 
 // SIGNAL 3
-void PantallaMisiones::volverPresionado()
+void PantallaMisiones::misionExtraPresionado()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
+}
+
+// SIGNAL 4
+void PantallaMisiones::volverPresionado()
+{
+    QMetaObject::activate(this, &staticMetaObject, 4, nullptr);
 }
 QT_WARNING_POP

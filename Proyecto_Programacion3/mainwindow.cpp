@@ -17,12 +17,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     configurarJuego();
     configurarNivel2();
     configurarNivel3();
+    configurarNivelExtra();
     configurarInstrucciones();
     configurarMisiones();
     configurarRanking();
     // El orden de insercion define el indice de cada pantalla en el stack:
     // 0 = login, 1 = menu, 2 = juego (Mision 1), 3 = instrucciones,
-    // 4 = misiones, 5 = Nivel 2, 6 = Nivel 3, 7 = ranking.
+    // 4 = misiones, 5 = Nivel 2, 6 = Nivel 3, 7 = ranking,
+    // 8 = NivelExtra (supervivencia).
     stack->addWidget(pantallaLogin);       // 0
     stack->addWidget(menu);                // 1
     stack->addWidget(pantallaJuego);       // 2
@@ -31,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     stack->addWidget(pantallaNivel2);      // 5
     stack->addWidget(pantallaNivel3);      // 6
     stack->addWidget(pantallaRanking);     // 7
+    stack->addWidget(pantallaNivelExtra);  // 8
     stack->setCurrentIndex(INDICE_LOGIN);  // se abre el login de primeras
 
     // --- Login ---
@@ -53,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     connect(pantallaMisiones, &PantallaMisiones::mision1Presionado, this, &MainWindow::mision1Elegida);
     connect(pantallaMisiones, &PantallaMisiones::mision2Presionado, this, &MainWindow::mision2Elegida);
     connect(pantallaMisiones, &PantallaMisiones::mision3Presionado, this, &MainWindow::mision3Elegida);
+    connect(pantallaMisiones, &PantallaMisiones::misionExtraPresionado, this, &MainWindow::misionExtraElegida);
 
     // El panel de resultado (victoria/derrota) dentro de PantallaJuego
     // reenvia estos botones hasta aca, que es quien controla el stack.
@@ -76,6 +80,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     connect(pantallaNivel3, &PantallaJuego::solicitaMenu, this, &MainWindow::irAMenu);
     connect(pantallaNivel3, &PantallaJuego::solicitaMisiones, this, &MainWindow::irAMisiones);
     connect(pantallaNivel3, &PantallaJuego::solicitaSiguienteNivel, this, &MainWindow::siguienteNivelSolicitado);
+    // El NivelExtra (supervivencia) usa las mismas señales heredadas.
+    connect(pantallaNivelExtra, &PantallaJuego::solicitaMenu, this, &MainWindow::irAMenu);
+    connect(pantallaNivelExtra, &PantallaJuego::solicitaMisiones, this, &MainWindow::irAMisiones);
+    connect(pantallaNivelExtra, &PantallaJuego::solicitaSiguienteNivel, this, &MainWindow::siguienteNivelSolicitado);
+    connect(pantallaNivelExtra, &PantallaJuego::partidaTerminada,
+            this, &MainWindow::guardarPuntajeRanking);
 }
 
 MainWindow::~MainWindow(){
@@ -99,6 +109,10 @@ void MainWindow::configurarNivel2(){
 
 void MainWindow::configurarNivel3(){
     pantallaNivel3 = new Nivel3(this);
+}
+
+void MainWindow::configurarNivelExtra(){
+    pantallaNivelExtra = new NivelExtra(this);
 }
 
 void MainWindow::configurarInstrucciones(){
@@ -153,6 +167,23 @@ void MainWindow::guardarPuntajeRanking(int nivel, int puntos, bool victoria){
         cout << "[INFO] record nuevo: " << m_usuarioActual.toStdString()
              << " nivel " << nivel << " puntos " << puntos << endl;
     }
+    if (nivel == 4) {
+        // Supervivencia: ademas del puntaje se guarda el mejor tiempo
+        // y la mayor distancia (el ranking ordena por esos valores).
+        PantallaJuego *juego = qobject_cast<PantallaJuego*>(sender());
+        int tiempoSeg = 0;
+        int distanciaM = 0;
+        if (juego != nullptr) {
+            tiempoSeg = juego->tiempoSupervivenciaSegundos();
+            distanciaM = juego->distanciaSupervivenciaMetros();
+        }
+        bool recordSup = GestorUsuarios::guardarMejorSupervivencia(
+            m_usuarioActual, tiempoSeg, distanciaM, puntos);
+        if (recordSup) {
+            cout << "[INFO] record supervivencia: " << m_usuarioActual.toStdString()
+                 << " tiempo " << tiempoSeg << "s distancia " << distanciaM << "m" << endl;
+        }
+    }
 }
 
 void MainWindow::irAMenu(){
@@ -185,6 +216,15 @@ void MainWindow::mision3Elegida(){
     pantallaNivel3->setFocus();
 }
 
+void MainWindow::misionExtraElegida(){
+    // Supervivencia: nivel infinito aparte (sin civiles, mas enemigos
+    // y estructuras que tapan la pantalla).
+    pantallaNivelExtra->reiniciarNivel();
+    stack->setCurrentIndex(INDICE_NIVELEXTRA);
+    QTimer::singleShot(0, pantallaNivelExtra, &PantallaJuego::ajustarVista);
+    pantallaNivelExtra->setFocus();
+}
+
 void MainWindow::siguienteNivelSolicitado(){
     if(sender() == pantallaJuego){
         // Se completo el Nivel 1: se pasa al Nivel 2.
@@ -201,6 +241,12 @@ void MainWindow::siguienteNivelSolicitado(){
         stack->setCurrentIndex(INDICE_NIVEL3);
         QTimer::singleShot(0, pantallaNivel3, &PantallaJuego::ajustarVista);
         pantallaNivel3->setFocus();
+        return;
+    }
+
+    // La supervivencia no tiene siguiente nivel: se vuelve a misiones.
+    if(sender() == pantallaNivelExtra){
+        stack->setCurrentIndex(INDICE_MISIONES);
         return;
     }
 

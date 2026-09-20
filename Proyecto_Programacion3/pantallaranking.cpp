@@ -22,12 +22,14 @@ void PantallaRanking::configurarElementos() {
     m_botonNivel2 = new CrearBoton("NIVEL 2", this);
     m_botonNivel3 = new CrearBoton("NIVEL 3", this);
     m_botonGeneral = new CrearBoton("GENERAL", this);
+    m_botonSupervivencia = new CrearBoton("SUPERVIV.", this);
     m_botonVolver = new CrearBoton("VOLVER", this);
 
     connect(m_botonNivel1, &QPushButton::clicked, this, &PantallaRanking::mostrarNivel1);
     connect(m_botonNivel2, &QPushButton::clicked, this, &PantallaRanking::mostrarNivel2);
     connect(m_botonNivel3, &QPushButton::clicked, this, &PantallaRanking::mostrarNivel3);
     connect(m_botonGeneral, &QPushButton::clicked, this, &PantallaRanking::mostrarGeneral);
+    connect(m_botonSupervivencia, &QPushButton::clicked, this, &PantallaRanking::mostrarSupervivencia);
     connect(m_botonVolver, &QPushButton::clicked, this, &PantallaRanking::volverPresionado);
 
     m_tabla = new QTableWidget(this);
@@ -55,9 +57,10 @@ void PantallaRanking::mostrarNivel1() { mostrarCategoria(1); }
 void PantallaRanking::mostrarNivel2() { mostrarCategoria(2); }
 void PantallaRanking::mostrarNivel3() { mostrarCategoria(3); }
 void PantallaRanking::mostrarGeneral() { mostrarCategoria(4); }
+void PantallaRanking::mostrarSupervivencia() { mostrarCategoria(5); }
 
 void PantallaRanking::mostrarCategoria(int categoria) {
-    if (categoria < 1 || categoria > 4) {
+    if (categoria < 1 || categoria > 5) {
         categoria = 1;
     }
     m_categoria = categoria;
@@ -94,6 +97,30 @@ void PantallaRanking::llenarTabla() {
                 m_tabla->setItem(i, 3, new QTableWidgetItem(QString::number(n2)));
                 m_tabla->setItem(i, 4, new QTableWidgetItem(QString::number(n3)));
                 m_tabla->setItem(i, 5, new QTableWidgetItem(QString::number(rank[i].puntaje)));
+            }
+        }
+    } else if (m_categoria == 5) {
+        // Supervivencia: el primero es el que mas tiempo duro, luego
+        // el de mayor distancia y luego el de mas puntos.
+        m_tabla->setColumnCount(5);
+        m_tabla->setHorizontalHeaderLabels({"POS", "USUARIO", "TIEMPO", "DISTANCIA", "PUNTOS"});
+        QVector<GestorUsuarios::EntradaSupervivencia> rank =
+            GestorUsuarios::rankingSupervivencia();
+        if (rank.isEmpty()) {
+            m_tabla->setRowCount(1);
+            m_tabla->setItem(0, 0, new QTableWidgetItem("-"));
+            m_tabla->setItem(0, 1, new QTableWidgetItem("Sin usuarios registrados"));
+            m_tabla->setItem(0, 2, new QTableWidgetItem("-"));
+            m_tabla->setItem(0, 3, new QTableWidgetItem("-"));
+            m_tabla->setItem(0, 4, new QTableWidgetItem("0"));
+        } else {
+            m_tabla->setRowCount(rank.size());
+            for (int i = 0; i < rank.size(); ++i) {
+                m_tabla->setItem(i, 0, new QTableWidgetItem(QString::number(i + 1)));
+                m_tabla->setItem(i, 1, new QTableWidgetItem(rank[i].nombre));
+                m_tabla->setItem(i, 2, new QTableWidgetItem(QString("%1s").arg(rank[i].tiempoSeg)));
+                m_tabla->setItem(i, 3, new QTableWidgetItem(QString("%1m").arg(rank[i].distanciaM)));
+                m_tabla->setItem(i, 4, new QTableWidgetItem(QString::number(rank[i].puntaje)));
             }
         }
     } else {
@@ -144,21 +171,29 @@ void PantallaRanking::acomodarElementos() {
     m_tabla->move(xTabla, yTablaCentrada);
     m_tabla->resize(anchoTabla, altoTablaFinal);
 
-    int anchoTab = 110;
-    int altoTab = 35;
-    int espacio = 8;
-    int totalTabs = 4 * anchoTab + 3 * espacio;
+    int anchoTab = 100;
+    int altoTab = 32;
+    int espacio = 6;
+    int totalTabs = 5 * anchoTab + 4 * espacio;
     int x0 = (width() - totalTabs) / 2;
+    // El VOLVER va en la esquina inferior izquierda (x=20, ancho 120)
+    // en la misma fila: la primera pestaña nunca debe montarse sobre el.
+    int limiteVolver = 20 + 120 + 8;
+    if (x0 < limiteVolver) {
+        x0 = limiteVolver;
+    }
     int yTabs = yFilaBotones + (altoVolver - altoTab) / 2;
 
     m_botonNivel1->resize(anchoTab, altoTab);
     m_botonNivel2->resize(anchoTab, altoTab);
     m_botonNivel3->resize(anchoTab, altoTab);
     m_botonGeneral->resize(anchoTab, altoTab);
+    m_botonSupervivencia->resize(anchoTab, altoTab);
     m_botonNivel1->move(x0, yTabs);
     m_botonNivel2->move(x0 + (anchoTab + espacio), yTabs);
     m_botonNivel3->move(x0 + (anchoTab + espacio) * 2, yTabs);
     m_botonGeneral->move(x0 + (anchoTab + espacio) * 3, yTabs);
+    m_botonSupervivencia->move(x0 + (anchoTab + espacio) * 4, yTabs);
 
     // VOLVER en la esquina inferior izquierda, en la misma fila.
     int anchoVolver = 120;

@@ -19,6 +19,7 @@ SOURCES += \
     menuprincipal.cpp \
     nivel2.cpp \
     nivel3.cpp \
+    nivelextra.cpp \
     obstaculo.cpp \
     obstaculoestatico.cpp \
     obstaculomovil.cpp \
@@ -42,6 +43,7 @@ HEADERS += \
     menuprincipal.h \
     nivel2.h \
     nivel3.h \
+    nivelextra.h \
     obstaculo.h \
     obstaculoestatico.h \
     obstaculomovil.h \

@@ -11,6 +11,7 @@ release/helicoptero.o
 release/menuprincipal.o
 release/nivel2.o
 release/nivel3.o
+release/nivelextra.o
 release/obstaculo.o
 release/obstaculoestatico.o
 release/obstaculomovil.o

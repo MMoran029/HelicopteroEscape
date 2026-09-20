@@ -3,4 +3,7 @@ contrasena=1234
 mejorPuntajeNivel1=1400
 mejorPuntajeNivel2=950
 mejorPuntajeNivel3=275
+mejorPuntajeSupervivencia=285
+mejorSupervivenciaTiempo=27
+mejorSupervivenciaDistancia=362
 mejorPuntaje=0

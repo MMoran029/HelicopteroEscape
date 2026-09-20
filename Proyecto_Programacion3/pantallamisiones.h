@@ -16,12 +16,14 @@ signals:
     void mision1Presionado();
     void mision2Presionado();
     void mision3Presionado();
+    void misionExtraPresionado();
     void volverPresionado();
 private:
     QPixmap fondoMisiones;
     CrearBoton *botonMision1;
     CrearBoton *botonMision2;
     CrearBoton *botonMision3;
+    CrearBoton *botonMisionExtra;
     CrearBoton *botonVolver;
     void configurarElementos();
     void acomodarElementos();

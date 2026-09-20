@@ -45,7 +45,8 @@ template <> constexpr inline auto PantallaRanking::qt_create_metaobjectdata<qt_m
         "mostrarNivel1",
         "mostrarNivel2",
         "mostrarNivel3",
-        "mostrarGeneral"
+        "mostrarGeneral",
+        "mostrarSupervivencia"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -61,6 +62,8 @@ template <> constexpr inline auto PantallaRanking::qt_create_metaobjectdata<qt_m
         QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'mostrarGeneral'
         QtMocHelpers::SlotData<void()>(7, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'mostrarSupervivencia'
+        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -90,6 +93,7 @@ void PantallaRanking::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 3: _t->mostrarNivel2(); break;
         case 4: _t->mostrarNivel3(); break;
         case 5: _t->mostrarGeneral(); break;
+        case 6: _t->mostrarSupervivencia(); break;
         default: ;
         }
     }
@@ -118,14 +122,14 @@ int PantallaRanking::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

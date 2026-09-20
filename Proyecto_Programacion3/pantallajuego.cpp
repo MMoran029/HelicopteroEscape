@@ -33,7 +33,8 @@ PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
     contadorFramesBidon(0), intervaloBidon(280),
     juegoIniciado(false),
     contadorFramesEdificio(0), intervaloEdificio(150),
-    contadorFramesEnemigo(0), intervaloEnemigo(260)
+    contadorFramesEnemigo(0), intervaloEnemigo(260),
+    framesSupervivencia(0), contadorFramesEstructura(0), intervaloEstructura(550)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -87,6 +88,10 @@ void PantallaJuego::configurarEscena(){
     if(nivelJuego == 3){
         rutaFondo = ":/imagenes/Imagenes/fondo_nivel3.png";
     }
+    if(nivelJuego == 4){
+        // Supervivencia: se reutiliza el fondo mas oscuro (nivel 3).
+        rutaFondo = ":/imagenes/Imagenes/fondo_nivel3.png";
+    }
     QPixmap fondoOriginal(rutaFondo);
     QPixmap fondoEscalado = fondoOriginal.scaled(ANCHO_ESCENA, ALTO_ESCENA,
                                                  Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -122,6 +127,30 @@ void PantallaJuego::actualizarSpriteJugador(){
     helicoptero->setConArmas(jugadorTieneArmas());
 }
 
+int PantallaJuego::obtenerIntervaloEdificioBase() const{
+    return 140 + (rand() % 120);
+}
+
+int PantallaJuego::obtenerIntervaloEnemigoBase() const{
+    return 200 + (rand() % 180);
+}
+
+void PantallaJuego::fijarVelocidadScroll(qreal nuevaVelocidad){
+    velocidadScroll = nuevaVelocidad;
+}
+
+qreal PantallaJuego::leerVelocidadScroll() const{
+    return velocidadScroll;
+}
+
+qreal PantallaJuego::leerDistancia() const{
+    return distanciaRecorrida;
+}
+
+int PantallaJuego::leerFramesSupervivencia() const{
+    return framesSupervivencia;
+}
+
 void PantallaJuego::configurarHUD(){
     hud = new QLabel(this);
     hud->setStyleSheet("background-color: rgb(20,20,20); color: white; padding: 4px; font-weight: bold;");
@@ -141,7 +170,19 @@ void PantallaJuego::configurarBarrasHUD(){
     barraCombustible->setFixedSize(210, 22);
     barraCombustible->raise();
 
+    aplicarVisibilidadBarras();
     actualizarBarrasHUD();
+}
+
+void PantallaJuego::aplicarVisibilidadBarras(){
+    if (barraProgreso == nullptr) {
+        return;
+    }
+    if (mostrarBarraProgreso() == true) {
+        barraProgreso->show();
+    } else {
+        barraProgreso->hide();
+    }
 }
 
 void PantallaJuego::ajustarVista(){
@@ -187,7 +228,7 @@ void PantallaJuego::resizeEvent(QResizeEvent *event){
     }
     int margen = 10;
     int baseY = hud->height() + margen;
-    if (barraProgreso != nullptr) {
+    if (barraProgreso != nullptr && mostrarBarraProgreso() == true) {
         barraProgreso->move(margen, baseY);
         barraProgreso->raise();
     }
@@ -228,6 +269,11 @@ void PantallaJuego::generarEdificio(){
 
     ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, alto, variante, nivelJuego);
     agregarObstaculo(edificio);
+
+    // En supervivencia no hay civiles: los edificios salen vacios.
+    if (generaCiviles() == false) {
+        return;
+    }
 
     // No todos los edificios tienen civiles: 40% de probabilidad.
     if (rand() % 100 < 40) {
@@ -521,7 +567,7 @@ void PantallaJuego::eliminarCivilesFuera(){
         // se cuenta como perdido (se dejo atras).
         if (seFue && !yaResuelto) {
             civilesPerdidos += civiles[i]->getCantidadPersonas();
-            puntos -= 100 * civiles[i]->getCantidadPersonas();
+            modificarPuntos(-100 * civiles[i]->getCantidadPersonas());
         }
 
         if (seFue || yaResuelto) {
@@ -709,7 +755,7 @@ void PantallaJuego::revisarColisiones(){
 
                 // penetro demasiado o venia cayendo muy rapido: aterrizaje brusco = choque
                 vidas--;
-                puntos -= 100;
+                modificarPuntos(-100);
                 // Si el edificio tenia un grupo de civiles sobre el techo
                 // y aun no habia sido resuelto, cae abatido junto con el
                 // edificio y se cuenta como perdido.
@@ -717,7 +763,7 @@ void PantallaJuego::revisarColisiones(){
                 if (civilDelEdificio != nullptr && civilDelEdificio->estaActivo() && !civilDelEdificio->estaRescatado() && !civilDelEdificio->estaAplastado()){
                     civilDelEdificio->aplastar();
                     civilesPerdidos += civilDelEdificio->getCantidadPersonas();
-                    puntos -= 100 * civilDelEdificio->getCantidadPersonas();
+                    modificarPuntos(-100 * civilDelEdificio->getCantidadPersonas());
                 }
 
                 eliminarObstaculoEnIndice(i);
@@ -731,7 +777,7 @@ void PantallaJuego::revisarColisiones(){
             // Obstaculo movil (enemigo): cualquier contacto es dano, sin excepciones.
             if (rectHelicoptero.intersects(obstaculos[i]->sceneBoundingRect())) {
                 vidas--;
-                puntos -= 100;
+                modificarPuntos(-100);
                 eliminarObstaculoEnIndice(i);
 
                 if (vidas <= 0) {
@@ -760,14 +806,14 @@ void PantallaJuego::revisarRescates(){
                 // El helicoptero les cayo encima demasiado rapido: se aplastan.
                 civiles[i]->aplastar();
                 civilesPerdidos += civiles[i]->getCantidadPersonas();
-                puntos -= 100 * civiles[i]->getCantidadPersonas();
+                modificarPuntos(-100 * civiles[i]->getCantidadPersonas());
             }else{
                 bool cerca = civiles[i]->verificarCercania(helicX, helicY, DISTANCIA_RESCATE); //ahora cuando nos acerquemos al civil empezara un timer, (cuenta frames)
                 civiles[i]->actualizarRescate(cerca);                                          //pero a segundos son 1.5, hasta que termine se rescatara el civil
 
                 if(civiles[i]->estaRescatado() == true){//en el mismo frame que rescatamos, activo=false, asi evitamos que nos sume tantos puntos
                     civilesRescatados += civiles[i]->getCantidadPersonas();
-                    puntos += 100 * civiles[i]->getCantidadPersonas();
+                    modificarPuntos(100 * civiles[i]->getCantidadPersonas());
                 }
             }
         }
@@ -805,6 +851,13 @@ void PantallaJuego::actualizarCombustible(){
     }
 }
 
+void PantallaJuego::modificarPuntos(int delta){
+    puntos += delta;
+    if(puntos < 0){
+        puntos = 0;
+    }
+}
+
 void PantallaJuego::revisarColisionesDisparos(){
     for(int i=numDisparos - 1 ; i>=0 ; i--){
         Disparo *disparo = disparos[i];
@@ -821,7 +874,7 @@ void PantallaJuego::revisarColisionesDisparos(){
                 if(disparo->sceneBoundingRect().intersects(civiles[j]->sceneBoundingRect()) == true){
                     civiles[j]->aplastar();
                     civilesPerdidos += civiles[j]->getCantidadPersonas();
-                    puntos -= 100 * civiles[j]->getCantidadPersonas();
+                    modificarPuntos(-100 * civiles[j]->getCantidadPersonas());
                     disparoConsumido = true;
                     break;
                 }
@@ -835,7 +888,7 @@ void PantallaJuego::revisarColisionesDisparos(){
                         continue;
                     }
                     if(disparo->sceneBoundingRect().intersects(enemigo->sceneBoundingRect()) == true){
-                        puntos += 25;
+                        modificarPuntos(25);
                         eliminarObstaculoEnIndice(j);
                         disparoConsumido = true;
                         break;
@@ -860,7 +913,7 @@ void PantallaJuego::revisarColisionesDisparos(){
             // Disparo enemigo: solo puede danar al helicoptero del jugador.
             if(disparo->sceneBoundingRect().intersects(helicoptero->sceneBoundingRect()) == true){
                 vidas--;
-                puntos -= 100;
+                modificarPuntos(-100);
                 disparoConsumido = true;
                 if(vidas <= 0){
                     finalizarJuego(EstadoJuego::Derrota);
@@ -899,6 +952,17 @@ void PantallaJuego::revisarColisionEstructura(){
 }
 
 void PantallaJuego::actualizarHUD(){
+    if(esInfinito() == true){
+        int segundos = framesSupervivencia / 60;
+        int distanciaMetros = static_cast<int>(distanciaRecorrida / 10.0);
+        QString texto = QString("SUPERVIVENCIA   |   Tiempo: %1s   |   Distancia: %2m   |   Vidas: %3   |   Puntos: %4")
+                            .arg(segundos)
+                            .arg(distanciaMetros)
+                            .arg(vidas)
+                            .arg(puntos);
+        hud->setText(texto);
+        return;
+    }
     QString texto = QString("NIVEL: %1   |   Vidas: %2   |   Rescatados: %3   |   Perdidos: %4   |   Puntos: %5")
                         .arg(nivelJuego)
                         .arg(vidas)
@@ -909,8 +973,18 @@ void PantallaJuego::actualizarHUD(){
 }
 
 void PantallaJuego::actualizarBarrasHUD(){
-    int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
     int porcentajeCombustible = static_cast<int>(combustible);
+    if(mostrarBarraProgreso() == false){
+        // Sin barra de progreso (supervivencia): solo combustible.
+        if (barraProgreso != nullptr) {
+            barraProgreso->hide();
+        }
+        if (barraCombustible != nullptr) {
+            barraCombustible->setValor(porcentajeCombustible);
+        }
+        return;
+    }
+    int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
     if (barraProgreso != nullptr) {
         barraProgreso->setValor(progreso);
     }
@@ -943,13 +1017,23 @@ void PantallaJuego::finalizarJuego(EstadoJuego resultado){
     timerJuego->stop();
 
     bool victoria = (resultado == EstadoJuego::Victoria);
-    int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
-
-    QString info = QString("Civiles rescatados: %1\nCiviles perdidos: %2\nProgreso alcanzado: %3%\nVidas restantes: %4")
-                       .arg(civilesRescatados)
-                       .arg(civilesPerdidos)
-                       .arg(progreso)
-                       .arg(vidas);
+    QString info;
+    if(esInfinito() == true){
+        int segundos = framesSupervivencia / 60;
+        int distanciaMetros = static_cast<int>(distanciaRecorrida / 10.0);
+        info = QString("Tiempo sobrevivido: %1s\nDistancia recorrida: %2m\nPuntos: %3\nVidas restantes: %4")
+                   .arg(segundos)
+                   .arg(distanciaMetros)
+                   .arg(puntos)
+                   .arg(vidas);
+    } else {
+        int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
+        info = QString("Civiles rescatados: %1\nCiviles perdidos: %2\nProgreso alcanzado: %3%\nVidas restantes: %4")
+                   .arg(civilesRescatados)
+                   .arg(civilesPerdidos)
+                   .arg(progreso)
+                   .arg(vidas);
+    }
 
     hud->setText(victoria ? "Escape exitoso" : "Helicoptero destruido");
     panelResultado->mostrarResultado(victoria, info);
@@ -961,6 +1045,7 @@ void PantallaJuego::finalizarJuego(EstadoJuego resultado){
 void PantallaJuego::reiniciarNivel(){
     limpiarNivel();
     panelResultado->hide();
+    aplicarVisibilidadBarras();
 
     helicoptero->setPos(100, ALTO_ESCENA / 2);
     helicoptero->setSubiendo(false);
@@ -975,11 +1060,17 @@ void PantallaJuego::reiniciarNivel(){
     civilesPerdidos = 0;
     puntos = 0;
     distanciaRecorrida = 0;
+    velocidadScroll = obtenerVelocidadInicial();
     combustible = 100.0;
     contadorFramesBidon = 0;
     intervaloBidon = obtenerIntervaloBidon();
     contadorFramesEdificio = 0;
+    intervaloEdificio = obtenerIntervaloEdificioBase();
     contadorFramesEnemigo = 0;
+    intervaloEnemigo = obtenerIntervaloEnemigoBase();
+    framesSupervivencia = 0;
+    contadorFramesEstructura = 0;
+    intervaloEstructura = obtenerIntervaloEstructura();
     teclaEspacioPresionada = false;
     contadorEnfriamientoDisparo = 0;
     contadorInvulnerable = 0;
@@ -1015,6 +1106,15 @@ void PantallaJuego::actualizarJuego(){
     }
 
     distanciaRecorrida += velocidadScroll;
+    if(esInfinito() == true){
+        // Supervivencia: cronometro propio, puntos por aguantar y
+        // dificultad creciente. Nunca hay victoria por distancia.
+        framesSupervivencia++;
+        if(framesSupervivencia % 60 == 0){
+            modificarPuntos(5); // +5 puntos por cada segundo vivo
+        }
+        ajustarDificultad();
+    }
     if(usaEstructuraBloqueadora() == true && estructura != nullptr && estructura->estaDestruida() == false){
         // No se puede "avanzar" mas alla de la meta mientras la
         // estructura siga viva: se congela el progreso justo en el
@@ -1031,7 +1131,8 @@ void PantallaJuego::actualizarJuego(){
         // Con velocidadScroll=1.6, 140-260 frames = 224 a 416 px de
         // separacion, siempre mayor que el ancho maximo posible de un
         // edificio (~160px), para que nunca se amontonen entre si.
-        intervaloEdificio = 140 + (rand() % 120);
+        // En supervivencia el rango lo define NivelExtra (mas seguido).
+        intervaloEdificio = obtenerIntervaloEdificioBase();
     }
 
     contadorFramesEnemigo++;
@@ -1040,7 +1141,8 @@ void PantallaJuego::actualizarJuego(){
         contadorFramesEnemigo = 0;
         // 200-380 frames = 320 a 608 px de separacion, bastante mas que
         // el ancho maximo de un enemigo (~100px).
-        intervaloEnemigo = 200 + (rand() % 180);
+        // En supervivencia el rango lo define NivelExtra (mas seguido).
+        intervaloEnemigo = obtenerIntervaloEnemigoBase();
     }
 
     contadorFramesBidon++;
@@ -1050,7 +1152,19 @@ void PantallaJuego::actualizarJuego(){
         intervaloBidon = obtenerIntervaloBidon() + (rand() % 100);
     }
 
-    if(usaEstructuraBloqueadora() == true && estructuraGenerada == false && distanciaRecorrida >= distanciaMeta * 0.55){
+    if(esInfinito() == true && usaEstructuraBloqueadora() == true){
+        // Supervivencia: las estructuras reaparecen una y otra vez para
+        // tapar la pantalla. Solo hay una viva a la vez; cuando se
+        // destruye (o se esquiva y sale), empieza la cuenta para la
+        // siguiente.
+        contadorFramesEstructura++;
+        if(estructura == nullptr && contadorFramesEstructura >= intervaloEstructura){
+            generarEstructura();
+            estructuraGenerada = true;
+            contadorFramesEstructura = 0;
+            intervaloEstructura = obtenerIntervaloEstructura();
+        }
+    } else if(usaEstructuraBloqueadora() == true && estructuraGenerada == false && distanciaRecorrida >= distanciaMeta * 0.55){
         generarEstructura();
     }
 
@@ -1103,14 +1217,17 @@ void PantallaJuego::actualizarJuego(){
         return;
     }
 
-    bool puedeTerminar = true;
-    if(usaEstructuraBloqueadora() == true && estructura != nullptr && estructura->estaDestruida() == false){
-        puedeTerminar = false;
-    }
+    // En supervivencia nunca hay victoria: solo se termina por derrota.
+    if(esInfinito() == false){
+        bool puedeTerminar = true;
+        if(usaEstructuraBloqueadora() == true && estructura != nullptr && estructura->estaDestruida() == false){
+            puedeTerminar = false;
+        }
 
-    if (distanciaRecorrida >= distanciaMeta && puedeTerminar == true) {
-        finalizarJuego(EstadoJuego::Victoria);
-        return;
+        if (distanciaRecorrida >= distanciaMeta && puedeTerminar == true) {
+            finalizarJuego(EstadoJuego::Victoria);
+            return;
+        }
     }
 
     actualizarHUD();

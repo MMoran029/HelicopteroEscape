@@ -6,6 +6,7 @@
 #include "pantallajuego.h"
 #include "nivel2.h"
 #include "nivel3.h"
+#include "nivelextra.h"
 #include "pantallainstrucciones.h"
 #include "pantallamisiones.h"
 #include "pantalla_inicio_sesion.h"
@@ -30,6 +31,7 @@ private slots:
     void mision1Elegida();
     void mision2Elegida();
     void mision3Elegida();
+    void misionExtraElegida();
     void siguienteNivelSolicitado();
     void sesionIniciada(const QString &nombreUsuario);
     void irARanking();
@@ -42,6 +44,7 @@ private:
     PantallaJuego *pantallaJuego;
     Nivel2 *pantallaNivel2;
     Nivel3 *pantallaNivel3;
+    NivelExtra *pantallaNivelExtra;
     PantallaInstrucciones *pantallaInstrucciones;
     PantallaMisiones *pantallaMisiones;
     PantallaRanking *pantallaRanking;
@@ -57,7 +60,8 @@ private:
         INDICE_MISIONES = 4,
         INDICE_NIVEL2 = 5,
         INDICE_NIVEL3 = 6,
-        INDICE_RANKING = 7
+        INDICE_RANKING = 7,
+        INDICE_NIVELEXTRA = 8
     };
 
     void configurarLogin();
@@ -65,6 +69,7 @@ private:
     void configurarJuego();
     void configurarNivel2();
     void configurarNivel3();
+    void configurarNivelExtra();
     void configurarInstrucciones();
     void configurarMisiones();
     void configurarRanking();

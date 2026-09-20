@@ -49,6 +49,7 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "mision1Elegida",
         "mision2Elegida",
         "mision3Elegida",
+        "misionExtraElegida",
         "siguienteNivelSolicitado",
         "sesionIniciada",
         "nombreUsuario",
@@ -76,17 +77,19 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'mision3Elegida'
         QtMocHelpers::SlotData<void()>(9, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'siguienteNivelSolicitado'
+        // Slot 'misionExtraElegida'
         QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'siguienteNivelSolicitado'
+        QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'sesionIniciada'
-        QtMocHelpers::SlotData<void(const QString &)>(11, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 12 },
+        QtMocHelpers::SlotData<void(const QString &)>(12, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 13 },
         }}),
         // Slot 'irARanking'
-        QtMocHelpers::SlotData<void()>(13, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'guardarPuntajeRanking'
-        QtMocHelpers::SlotData<void(int, int, bool)>(14, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 15 }, { QMetaType::Int, 16 }, { QMetaType::Bool, 17 },
+        QtMocHelpers::SlotData<void(int, int, bool)>(15, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 16 }, { QMetaType::Int, 17 }, { QMetaType::Bool, 18 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -119,10 +122,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 5: _t->mision1Elegida(); break;
         case 6: _t->mision2Elegida(); break;
         case 7: _t->mision3Elegida(); break;
-        case 8: _t->siguienteNivelSolicitado(); break;
-        case 9: _t->sesionIniciada((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
-        case 10: _t->irARanking(); break;
-        case 11: _t->guardarPuntajeRanking((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<bool>>(_a[3]))); break;
+        case 8: _t->misionExtraElegida(); break;
+        case 9: _t->siguienteNivelSolicitado(); break;
+        case 10: _t->sesionIniciada((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 11: _t->irARanking(); break;
+        case 12: _t->guardarPuntajeRanking((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<bool>>(_a[3]))); break;
         default: ;
         }
     }
@@ -147,14 +151,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 13;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 13)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 12;
+        _id -= 13;
     }
     return _id;
 }

@@ -10,15 +10,27 @@
 // Estructura en disco (junto al .exe):
 //   USUARIOS/
 //     <nombre_usuario>/
-//       datos.txt -> nombre, contrasena, mejorPuntajeNivel1/2/3
+//       datos.txt -> nombre, contrasena, mejorPuntajeNivel1/2/3,
+//                    mejorPuntajeSupervivencia, mejorSupervivenciaTiempo,
+//                    mejorSupervivenciaDistancia
 //
 // El datos.txt es un archivo de texto simple "clave=valor" para que
 // sea facil de leer y sirva para el apartado de rankings.
 // El puntaje GENERAL de un usuario es la suma de sus 3 niveles.
+// Todos los puntajes tienen minimo 0 (nunca negativos).
 class GestorUsuarios {
 public:
     struct EntradaRanking {
         QString nombre;
+        int puntaje = 0;
+    };
+
+    // Una fila del ranking de supervivencia: se ordena por mas
+    // tiempo, luego por mayor distancia y luego por mas puntos.
+    struct EntradaSupervivencia {
+        QString nombre;
+        int tiempoSeg = 0;
+        int distanciaM = 0;
         int puntaje = 0;
     };
 
@@ -45,21 +57,34 @@ public:
     static bool validarCredenciales(const QString &nombre, const QString &contrasena,
                                     QString &mensajeError);
 
-    // ---- Puntajes por nivel (1, 2 o 3) ----
+    // ---- Puntajes por nivel (1, 2, 3 y 4=SUPERVIVENCIA) ----
     static int obtenerMejorPuntaje(const QString &nombre, int nivel);
     // Solo guarda si el nuevo puntaje supera al anterior. Devuelve true
     // si se guardo un record nuevo.
     static bool guardarMejorPuntaje(const QString &nombre, int nivel, int puntaje);
     static void obtenerPuntajes(const QString &nombre, int &n1, int &n2, int &n3);
+    static void obtenerPuntajes(const QString &nombre, int &n1, int &n2, int &n3, int &nSupervivencia);
     static int puntajeGeneral(const QString &nombre);
 
     // Compatibilidad con la version anterior (un solo mejorPuntaje).
     static int obtenerMejorPuntaje(const QString &nombre);
     static bool guardarMejorPuntaje(const QString &nombre, int puntaje);
 
+    // ---- Supervivencia (nivel extra infinito) ----
+    // Lee el mejor tiempo (segundos), distancia (metros) y puntaje.
+    static void obtenerSupervivencia(const QString &nombre, int &tiempoSeg,
+                                     int &distanciaM, int &puntaje);
+    // Solo guarda si la marca nueva supera a la anterior: mas tiempo;
+    // a igual tiempo, mas distancia; a igual distancia, mas puntos.
+    // Devuelve true si se guardo un record nuevo.
+    static bool guardarMejorSupervivencia(const QString &nombre, int tiempoSeg,
+                                          int distanciaM, int puntaje);
+
     // ---- Rankings ordenados de mayor a menor ----
     static QVector<EntradaRanking> rankingPorNivel(int nivel);
     static QVector<EntradaRanking> rankingGeneral();
+    // Ordenado por mas tiempo, luego mayor distancia, luego mas puntos.
+    static QVector<EntradaSupervivencia> rankingSupervivencia();
 
 private:
     static QString rutaCarpetaUsuario(const QString &nombreSanitizado);

@@ -45,8 +45,17 @@ public:
 
     // Puntaje y nivel actuales. Los usa MainWindow para guardar el
     // record del usuario (USUARIOS/<nombre>/datos.txt) al terminar.
-    int puntajeActual() const { return puntos; }
+    // El puntaje nunca es negativo (ver modificarPuntos).
+    int puntajeActual() const { return puntos < 0 ? 0 : puntos; }
     int numeroNivel() const { return nivelJuego; }
+
+    // Marca de supervivencia (solo NivelExtra): segundos vividos y
+    // metros recorridos. MainWindow los usa para el ranking.
+    int tiempoSupervivenciaSegundos() const { return framesSupervivencia / 60; }
+    int distanciaSupervivenciaMetros() const {
+        int m = static_cast<int>(distanciaRecorrida / 10.0);
+        return m < 0 ? 0 : m;
+    }
 
     // Reajusta la escala de la vista a la escena logica de 800x500.
     // Es publico para que MainWindow pueda invocarlo (de forma
@@ -104,6 +113,45 @@ protected:
         fuerzaX = 0.0;
         fuerzaY = 0.0;
     }
+
+    // ---- Ganchos del nivel infinito / supervivencia (NivelExtra) ----
+    // Base = comportamiento de la historia (niveles 1-3): con meta de
+    // distancia, con civiles y con una sola estructura bloqueadora.
+    virtual bool esInfinito() const { return false; }
+    virtual bool generaCiviles() const { return true; }
+    // Cada cuantos frames aparece el proximo edificio / enemigo.
+    // La base replica los rangos originales de actualizarJuego().
+    virtual int obtenerIntervaloEdificioBase() const;
+    virtual int obtenerIntervaloEnemigoBase() const;
+    // Cada cuantos frames reaparece una estructura bloqueadora en el
+    // modo infinito. Base = -1 (sin reaparicion: modo historia).
+    virtual int obtenerIntervaloEstructura() const { return -1; }
+    // Velocidad de scroll con la que arranca el nivel.
+    virtual qreal obtenerVelocidadInicial() const { return 1.6; }
+    // Se llama cada frame en el modo infinito para subir la
+    // dificultad (mas velocidad, mas enemigos, etc.). Base = nada.
+    virtual void ajustarDificultad() {}
+
+    // Accesos protegidos para que NivelExtra pueda escalar la
+    // dificultad sin exponer los miembros privados.
+    void fijarVelocidadScroll(qreal nuevaVelocidad);
+    qreal leerVelocidadScroll() const;
+    qreal leerDistancia() const;
+    int leerFramesSupervivencia() const;
+
+    // HUD y cierre: virtuales para que el modo infinito muestre
+    // tiempo/distancia en vez de porcentaje de progreso.
+    virtual void actualizarHUD();
+    virtual void actualizarBarrasHUD();
+    virtual void finalizarJuego(EstadoJuego resultado);
+
+    // La supervivencia no tiene meta, asi que no muestra la barra de
+    // progreso (solo la de combustible). Base = mostrarla.
+    virtual bool mostrarBarraProgreso() const { return true; }
+    // Muestra u oculta la barra de progreso segun
+    // mostrarBarraProgreso(). No es virtual: NivelExtra la llama en
+    // su constructor y en cada reinicio.
+    void aplicarVisibilidadBarras();
 
     // Aplica el sprite correcto (con o sin armas) al helicoptero segun
     // jugadorTieneArmas(). Los constructores de Nivel2/Nivel3 deben
@@ -197,6 +245,13 @@ private:
     int contadorFramesEnemigo;
     int intervaloEnemigo;
 
+    // ---- Control del modo infinito / supervivencia ----
+    // framesSupervivencia cuenta los frames desde que arranco la
+    // partida (sirve como cronometro: ~60 frames = 1 segundo).
+    int framesSupervivencia;
+    int contadorFramesEstructura;
+    int intervaloEstructura;
+
     void configurarEscena();
     void configurarHUD();
     void configurarBarrasHUD();
@@ -245,10 +300,11 @@ private:
     void revisarRecoleccionCombustible();
     void revisarColisionesDisparos();
     void revisarColisionEstructura();
-    void actualizarHUD();
-    void actualizarBarrasHUD();
 
-    void finalizarJuego(EstadoJuego resultado);
+    // Suma (o resta, si delta es negativo) puntos, sin dejar que el
+    // total baje de 0. Todo cambio al puntaje pasa por aqui.
+    void modificarPuntos(int delta);
+
     void limpiarNivel();
 };
 #endif // PANTALLAJUEGO_H
