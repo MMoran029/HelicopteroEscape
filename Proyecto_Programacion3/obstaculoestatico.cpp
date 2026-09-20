@@ -1,29 +1,43 @@
 #include "obstaculoestatico.h"
 
-QPixmap ObstaculoEstatico::obtenerImagen(int variante){
-    switch (variante) {
-    case 2:
-        return QPixmap(":/imagenes/Imagenes/Edificio_2.png");
-    case 3:
-        return QPixmap(":/imagenes/Imagenes/Edificio_3.png");
-    default:
-        return QPixmap(":/imagenes/Imagenes/Edificio_1.png");
+QPixmap ObstaculoEstatico::obtenerImagen(int variante, int nivel){
+    if(nivel == 2){
+        if(variante == 1){
+            return QPixmap(":/imagenes/Imagenes/Torre_1.png");
+        }
+        return QPixmap(":/imagenes/Imagenes/Torre_2.png");
     }
+    if(nivel == 3){
+        if(variante == 1){
+            return QPixmap(":/imagenes/Imagenes/Base_1.png");
+        }
+        if(variante == 2){
+            return QPixmap(":/imagenes/Imagenes/Base_2.png");
+        }
+        return QPixmap(":/imagenes/Imagenes/Base_3.png");
+    }
+    if(variante == 2){
+        return QPixmap(":/imagenes/Imagenes/Edificio_2.png");
+    }
+    if(variante == 3){
+        return QPixmap(":/imagenes/Imagenes/Edificio_3.png");
+    }
+    return QPixmap(":/imagenes/Imagenes/Edificio_1.png");
 }
 
-qreal ObstaculoEstatico::calcularAncho(qreal alto, int variante){
-    QPixmap referencia = obtenerImagen(variante);
-    if (referencia.height() == 0) {
-        return alto; // resguardo por si la imagen no cargo
+qreal ObstaculoEstatico::calcularAncho(qreal alto, int variante, int nivel){
+    QPixmap referencia = obtenerImagen(variante, nivel);
+    if(referencia.height() == 0){
+        return alto;
     }
     qreal proporcion = static_cast<qreal>(referencia.width()) / static_cast<qreal>(referencia.height());
     return alto * proporcion;
 }
 
-ObstaculoEstatico::ObstaculoEstatico(qreal posX, qreal posY, qreal alto, int variante)
-    : Obstaculo(posX, posY, calcularAncho(alto, variante), alto), civilAsociado(nullptr)
+ObstaculoEstatico::ObstaculoEstatico(qreal posX, qreal posY, qreal alto, int variante, int nivel)
+    : Obstaculo(posX, posY, calcularAncho(alto, variante, nivel), alto), civilAsociado(nullptr)
 {
-    imagen = obtenerImagen(variante);
+    imagen = obtenerImagen(variante, nivel);
 }
 
 void ObstaculoEstatico::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

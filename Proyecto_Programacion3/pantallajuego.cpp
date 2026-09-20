@@ -3,6 +3,7 @@
 #include <QBrush>
 #include <QVBoxLayout>
 #include <QGraphicsPixmapItem>
+#include <QString>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -66,7 +67,14 @@ void PantallaJuego::configurarEscena(){
     // Franja de piso: dos copias encadenadas para simular scroll
     // infinito. Cuando una sale completamente de la vista por la
     // izquierda, se reubica pegada detras de la otra.
-    QPixmap fondoOriginal(":/imagenes/Imagenes/fondo.png");
+    QString rutaFondo = ":/imagenes/Imagenes/fondo.png";
+    if(nivelJuego == 2){
+        rutaFondo = ":/imagenes/Imagenes/fondo_nivel2.png";
+    }
+    if(nivelJuego == 3){
+        rutaFondo = ":/imagenes/Imagenes/fondo_nivel3.png";
+    }
+    QPixmap fondoOriginal(rutaFondo);
     QPixmap fondoEscalado = fondoOriginal.scaled(ANCHO_ESCENA, ALTO_ESCENA,
                                                  Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     fondo1 = escena->addPixmap(fondoEscalado);
@@ -155,12 +163,12 @@ void PantallaJuego::generarEdificio(){
         alto = 120 + (rand() % 80);  // entre 120 y 200
     }
 
-    qreal ancho = ObstaculoEstatico::calcularAncho(alto, variante);
+    qreal ancho = ObstaculoEstatico::calcularAncho(alto, variante, nivelJuego);
 
     qreal posX = ANCHO_ESCENA + ancho;                          // aparece justo fuera de la vista
     qreal posY = (ALTO_ESCENA - ALTURA_SUELO) - alto / 2;       // apoyado sobre la franja de piso
 
-    ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, alto, variante);
+    ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, alto, variante, nivelJuego);
     agregarObstaculo(edificio);
 
     // No todos los edificios tienen civiles: 40% de probabilidad.
