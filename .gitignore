@@ -1,0 +1,8 @@
+Proyecto_Programacion3/build/
+*.o
+*.obj
+Makefile*
+*.exe
+debug/
+release/
+*.user

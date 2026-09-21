@@ -1,8 +1,0 @@
-nombre=chri
-contrasena=123
-mejorPuntajeNivel1=0
-mejorPuntajeNivel2=25
-mejorPuntajeNivel3=0
-mejorPuntajeSupervivencia=90
-mejorSupervivenciaTiempo=21
-mejorSupervivenciaDistancia=280
