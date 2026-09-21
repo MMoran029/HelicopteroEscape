@@ -65,7 +65,7 @@ CONFIG(debug, debug|release) {
 }else{
     COPIA_AUDIO_DEST = $$OUT_PWD/release/Audio
 }
-copyaudio.commands = $(COPY_DIR) $$shell_path($$PWD/Audio) $$shell_path($$COPIA_AUDIO_DEST)
+copyaudio.commands = $(COPY_DIR) $$shell_quote($$shell_path($$PWD/Audio)) $$shell_quote($$shell_path($$COPIA_AUDIO_DEST))
 first.depends = $(first) copyaudio
 export(first.depends)
 export(copyaudio.commands)
