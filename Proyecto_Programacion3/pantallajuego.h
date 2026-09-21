@@ -18,6 +18,9 @@
 #include "estructurabloqueadora.h"
 #include "panelresultado.h"
 #include "barrahud.h"
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QHideEvent>
 
 class QGraphicsPixmapItem;
 
@@ -68,6 +71,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
 signals:
     // El panel de resultado dispara estos botones; PantallaJuego los
@@ -89,6 +93,11 @@ protected:
     // frecuencia de bidones y el consumo de combustible mientras no
     // existan todavia las clases Nivel2/Nivel3.
     int nivelJuego;
+
+    // ---- Musica de fondo del nivel (cada nivel, incluida la
+    // supervivencia, tiene su propia cancion) ----
+    QMediaPlayer *musicaJuego;
+    QAudioOutput *salidaAudioJuego;
 
     // Cuantos frames pasan entre cada bidon generado. Sube con el
     // nivel (menos bidones = mas dificil), lo calcula obtenerIntervaloBidon().

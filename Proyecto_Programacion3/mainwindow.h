@@ -11,6 +11,8 @@
 #include "pantallamisiones.h"
 #include "pantalla_inicio_sesion.h"
 #include "pantallaranking.h"
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -49,6 +51,9 @@ private:
     PantallaMisiones *pantallaMisiones;
     PantallaRanking *pantallaRanking;
 
+    QMediaPlayer *musicaMenu;
+    QAudioOutput *salidaAudioMenu;
+
     QString m_usuarioActual;
 
     // Indices del QStackedWidget (el orden lo define el constructor).
@@ -73,5 +78,6 @@ private:
     void configurarInstrucciones();
     void configurarMisiones();
     void configurarRanking();
+    void configurarMusicaMenu();
 };
 #endif // MAINWINDOW_H

@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <QUrl>
+#include <QCoreApplication>
 using namespace std;
 
 // Solape entre las dos copias encadenadas del fondo y del piso. Tapa la
@@ -41,6 +43,24 @@ PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
     configurarEscena();
     configurarHUD();
     configurarBarrasHUD();
+
+    musicaJuego = new QMediaPlayer(this);
+    salidaAudioJuego = new QAudioOutput(this);
+    musicaJuego->setAudioOutput(salidaAudioJuego);
+
+    QString rutaMusica = QCoreApplication::applicationDirPath() + "/Audio/musica_nivel1.mp3";
+    if(nivelJuego == 2){
+        rutaMusica = QCoreApplication::applicationDirPath() + "/Audio/musica_nivel2.mp3";
+    }
+    if(nivelJuego == 3){
+        rutaMusica = QCoreApplication::applicationDirPath() + "/Audio/musica_nivel3.mp3";
+    }
+    if(nivelJuego == 4){
+        rutaMusica = QCoreApplication::applicationDirPath() + "/Audio/musica_supervivencia.mp3";
+    }
+    musicaJuego->setSource(QUrl::fromLocalFile(rutaMusica));
+    salidaAudioJuego->setVolume(0.05);
+    musicaJuego->setLoops(QMediaPlayer::Infinite);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -240,10 +260,16 @@ void PantallaJuego::resizeEvent(QResizeEvent *event){
 
 void PantallaJuego::showEvent(QShowEvent *event){
     QWidget::showEvent(event);
+    musicaJuego->play();
     // Al volver visible la pagina en el QStackedWidget, el layout
     // necesita un ciclo de eventos para darle su tamano final a la
     // vista: el ajuste diferido usa ese tamano real en vez del 0 inicial.
     QTimer::singleShot(0, this, &PantallaJuego::ajustarVista);
+}
+
+void PantallaJuego::hideEvent(QHideEvent *event){
+    QWidget::hideEvent(event);
+    musicaJuego->stop();
 }
 
 // ---------------------------------------------------------------
@@ -1043,6 +1069,9 @@ void PantallaJuego::finalizarJuego(EstadoJuego resultado){
 }
 
 void PantallaJuego::reiniciarNivel(){
+    musicaJuego->setPosition(0);
+    musicaJuego->play();
+
     limpiarNivel();
     panelResultado->hide();
     aplicarVisibilidadBarras();

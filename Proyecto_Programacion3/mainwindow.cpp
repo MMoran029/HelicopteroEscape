@@ -2,6 +2,7 @@
 #include "gestorusuarios.h"
 #include <QApplication>
 #include <QTimer>
+#include <QUrl>
 #include <iostream>
 using namespace std;
 
@@ -21,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     configurarInstrucciones();
     configurarMisiones();
     configurarRanking();
+    configurarMusicaMenu();
     // El orden de insercion define el indice de cada pantalla en el stack:
     // 0 = login, 1 = menu, 2 = juego (Mision 1), 3 = instrucciones,
     // 4 = misiones, 5 = Nivel 2, 6 = Nivel 3, 7 = ranking,
@@ -127,6 +129,19 @@ void MainWindow::configurarRanking(){
     pantallaRanking = new PantallaRanking(this);
 }
 
+void MainWindow::configurarMusicaMenu(){
+    musicaMenu = new QMediaPlayer(this);
+    salidaAudioMenu = new QAudioOutput(this);
+    musicaMenu->setAudioOutput(salidaAudioMenu);
+    musicaMenu->setSource(QUrl::fromLocalFile(QApplication::applicationDirPath() + "/Audio/musica_menu.mp3"));
+    salidaAudioMenu->setVolume(0.05);
+    musicaMenu->setLoops(QMediaPlayer::Infinite);
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
+
+    cout << "[INFO] musica de menu iniciada" << endl;
+}
+
 void MainWindow::sesionIniciada(const QString &nombreUsuario){
     m_usuarioActual = nombreUsuario;
     cout << "[INFO] sesion iniciada: " << nombreUsuario.toStdString() << endl;
@@ -134,6 +149,7 @@ void MainWindow::sesionIniciada(const QString &nombreUsuario){
 }
 
 void MainWindow::irAJuego(){
+    musicaMenu->stop();
     pantallaJuego->reiniciarNivel();
     stack->setCurrentIndex(INDICE_JUEGO);
     QTimer::singleShot(0, pantallaJuego, &PantallaJuego::ajustarVista);
@@ -141,14 +157,20 @@ void MainWindow::irAJuego(){
 }
 
 void MainWindow::irAInstrucciones(){
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
     stack->setCurrentIndex(INDICE_INSTRUCCIONES);
 }
 
 void MainWindow::irAMisiones(){
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
     stack->setCurrentIndex(INDICE_MISIONES);
 }
 
 void MainWindow::irARanking(){
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
     pantallaRanking->recargar();
     stack->setCurrentIndex(INDICE_RANKING);
 }
@@ -165,7 +187,7 @@ void MainWindow::guardarPuntajeRanking(int nivel, int puntos, bool victoria){
     bool recordNuevo = GestorUsuarios::guardarMejorPuntaje(m_usuarioActual, nivel, puntos);
     if (recordNuevo) {
         cout << "[INFO] record nuevo: " << m_usuarioActual.toStdString()
-             << " nivel " << nivel << " puntos " << puntos << endl;
+        << " nivel " << nivel << " puntos " << puntos << endl;
     }
     if (nivel == 4) {
         // Supervivencia: ademas del puntaje se guarda el mejor tiempo
@@ -181,12 +203,14 @@ void MainWindow::guardarPuntajeRanking(int nivel, int puntos, bool victoria){
             m_usuarioActual, tiempoSeg, distanciaM, puntos);
         if (recordSup) {
             cout << "[INFO] record supervivencia: " << m_usuarioActual.toStdString()
-                 << " tiempo " << tiempoSeg << "s distancia " << distanciaM << "m" << endl;
+            << " tiempo " << tiempoSeg << "s distancia " << distanciaM << "m" << endl;
         }
     }
 }
 
 void MainWindow::irAMenu(){
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
     stack->setCurrentIndex(INDICE_MENU);
 }
 
@@ -196,6 +220,7 @@ void MainWindow::salirDelJuego(){
 
 void MainWindow::mision1Elegida(){
     // La Mision 1 es el nivel del helicoptero que ya esta implementado.
+    musicaMenu->stop();
     pantallaJuego->reiniciarNivel();
     stack->setCurrentIndex(INDICE_JUEGO);
     QTimer::singleShot(0, pantallaJuego, &PantallaJuego::ajustarVista);
@@ -203,6 +228,7 @@ void MainWindow::mision1Elegida(){
 }
 
 void MainWindow::mision2Elegida(){
+    musicaMenu->stop();
     pantallaNivel2->reiniciarNivel();
     stack->setCurrentIndex(INDICE_NIVEL2);
     QTimer::singleShot(0, pantallaNivel2, &PantallaJuego::ajustarVista);
@@ -210,6 +236,7 @@ void MainWindow::mision2Elegida(){
 }
 
 void MainWindow::mision3Elegida(){
+    musicaMenu->stop();
     pantallaNivel3->reiniciarNivel();
     stack->setCurrentIndex(INDICE_NIVEL3);
     QTimer::singleShot(0, pantallaNivel3, &PantallaJuego::ajustarVista);
@@ -219,6 +246,7 @@ void MainWindow::mision3Elegida(){
 void MainWindow::misionExtraElegida(){
     // Supervivencia: nivel infinito aparte (sin civiles, mas enemigos
     // y estructuras que tapan la pantalla).
+    musicaMenu->stop();
     pantallaNivelExtra->reiniciarNivel();
     stack->setCurrentIndex(INDICE_NIVELEXTRA);
     QTimer::singleShot(0, pantallaNivelExtra, &PantallaJuego::ajustarVista);
@@ -246,10 +274,14 @@ void MainWindow::siguienteNivelSolicitado(){
 
     // La supervivencia no tiene siguiente nivel: se vuelve a misiones.
     if(sender() == pantallaNivelExtra){
+        musicaMenu->setPosition(0);
+        musicaMenu->play();
         stack->setCurrentIndex(INDICE_MISIONES);
         return;
     }
 
     // Se completo el Nivel 3 (el ultimo por ahora): se vuelve a la
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
     stack->setCurrentIndex(INDICE_MISIONES);
 }
