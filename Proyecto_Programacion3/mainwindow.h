@@ -79,5 +79,7 @@ private:
     void configurarMisiones();
     void configurarRanking();
     void configurarMusicaMenu();
+    void continuarMusicaMenu();
+    void reiniciarMusicaMenu();
 };
 #endif // MAINWINDOW_H

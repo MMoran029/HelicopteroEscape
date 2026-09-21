@@ -142,6 +142,17 @@ void MainWindow::configurarMusicaMenu(){
     cout << "[INFO] musica de menu iniciada" << endl;
 }
 
+void MainWindow::continuarMusicaMenu(){
+    if (musicaMenu->playbackState() != QMediaPlayer::PlayingState)
+        musicaMenu->play();
+}
+
+void MainWindow::reiniciarMusicaMenu(){
+    musicaMenu->setPosition(0);
+    musicaMenu->play();
+}
+
+
 void MainWindow::sesionIniciada(const QString &nombreUsuario){
     m_usuarioActual = nombreUsuario;
     cout << "[INFO] sesion iniciada: " << nombreUsuario.toStdString() << endl;
@@ -157,23 +168,25 @@ void MainWindow::irAJuego(){
 }
 
 void MainWindow::irAInstrucciones(){
-    musicaMenu->setPosition(0);
-    musicaMenu->play();
+    continuarMusicaMenu();
     stack->setCurrentIndex(INDICE_INSTRUCCIONES);
 }
 
-void MainWindow::irAMisiones(){
-    musicaMenu->setPosition(0);
-    musicaMenu->play();
-    stack->setCurrentIndex(INDICE_MISIONES);
-}
-
 void MainWindow::irARanking(){
-    musicaMenu->setPosition(0);
-    musicaMenu->play();
+    continuarMusicaMenu();
     pantallaRanking->recargar();
     stack->setCurrentIndex(INDICE_RANKING);
 }
+
+void MainWindow::irAMisiones(){
+    // Si viene de un nivel -> reinicia a 0, si viene del menu -> continua.
+    if (qobject_cast<PantallaJuego*>(sender()) != nullptr)
+        reiniciarMusicaMenu();
+    else
+        continuarMusicaMenu();
+    stack->setCurrentIndex(INDICE_MISIONES);
+}
+
 
 void MainWindow::guardarPuntajeRanking(int nivel, int puntos, bool victoria){
     Q_UNUSED(victoria);
@@ -208,9 +221,12 @@ void MainWindow::guardarPuntajeRanking(int nivel, int puntos, bool victoria){
     }
 }
 
+
 void MainWindow::irAMenu(){
-    musicaMenu->setPosition(0);
-    musicaMenu->play();
+    if (qobject_cast<PantallaJuego*>(sender()) != nullptr)
+        reiniciarMusicaMenu();
+    else
+        continuarMusicaMenu();
     stack->setCurrentIndex(INDICE_MENU);
 }
 
@@ -274,11 +290,13 @@ void MainWindow::siguienteNivelSolicitado(){
 
     // La supervivencia no tiene siguiente nivel: se vuelve a misiones.
     if(sender() == pantallaNivelExtra){
-        musicaMenu->setPosition(0);
-        musicaMenu->play();
+        reiniciarMusicaMenu();
         stack->setCurrentIndex(INDICE_MISIONES);
         return;
     }
+
+    reiniciarMusicaMenu();
+    stack->setCurrentIndex(INDICE_MISIONES);
 
     // Se completo el Nivel 3 (el ultimo por ahora): se vuelve a la
     musicaMenu->setPosition(0);
