@@ -55,8 +55,18 @@ HEADERS += \
     pantallaranking.h
 
 RESOURCES += \
-    recursos.qrc \
-    recursos.qrc \
+    recursos.qrc
 
 DISTFILES += \
     Inicio_sesion.png
+
+CONFIG(debug, debug|release) {
+    COPIA_AUDIO_DEST = $$OUT_PWD/debug/Audio
+}else{
+    COPIA_AUDIO_DEST = $$OUT_PWD/release/Audio
+}
+copyaudio.commands = $(COPY_DIR) $$shell_path($$PWD/Audio) $$shell_path($$COPIA_AUDIO_DEST)
+first.depends = $(first) copyaudio
+export(first.depends)
+export(copyaudio.commands)
+QMAKE_EXTRA_TARGETS += first copyaudio
