@@ -36,7 +36,7 @@ public:
     // Alto visual fijo que usan todas las imagenes de civiles (ver
     // constructor). PantallaJuego lo usa para calcular con precision
     // en que Y colocar el grupo justo sobre el techo de un edificio.
-    static qreal alturaVisual() { return 42.0; }
+    static qreal alturaVisual() { return 32.0; }
 
 private:
     bool rescatado;

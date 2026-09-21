@@ -14,7 +14,7 @@ double Nivel3::probabilidadEnemigoArmado() const{
 
 void Nivel3::obtenerFuerzaEmpuje(qreal &fuerzaX, qreal &fuerzaY) const{
     const int FRAMES_POR_RACHA = 45; // cuanto dura cada racha (~1.5s a 60fps)
-    const int RANGO = 15;            // -25 a 24 centesimas por eje
+    const int RANGO = 23;            // -25 a 24 centesimas por eje
 
     if(framesRestantesRacha <= 0){
         vientoX = (rand() % RANGO - RANGO / 2) / 100.0;
@@ -25,4 +25,8 @@ void Nivel3::obtenerFuerzaEmpuje(qreal &fuerzaX, qreal &fuerzaY) const{
     framesRestantesRacha--;
     fuerzaX = vientoX;
     fuerzaY = vientoY;
+}
+
+bool Nivel3::usaEstructuraBloqueadora() const{
+    return true;
 }

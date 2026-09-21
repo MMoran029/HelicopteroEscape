@@ -7,7 +7,7 @@ QPixmap ObstaculoEstatico::obtenerImagen(int variante, int nivel){
         }
         return QPixmap(":/imagenes/Imagenes/Torre_2.png");
     }
-    if(nivel == 3){
+    if(nivel == 3 || nivel == 4){
         if(variante == 1){
             return QPixmap(":/imagenes/Imagenes/Base_1.png");
         }

@@ -16,8 +16,8 @@ Civil::Civil(qreal posX, qreal posY, int cantidadPersonas)
         altoImagen = ALTO_OBJETIVO;
         anchoImagen = ALTO_OBJETIVO * proporcion;
     } else {
-        anchoImagen = 36;
-        altoImagen = 42;
+        anchoImagen = 28;
+        altoImagen = 32;
     }
 }
 

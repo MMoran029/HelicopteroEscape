@@ -292,6 +292,9 @@ void PantallaJuego::generarEdificio(){
 
     qreal posX = ANCHO_ESCENA + ancho;                          // aparece justo fuera de la vista
     qreal posY = (ALTO_ESCENA - ALTURA_SUELO) - alto / 2;       // apoyado sobre la franja de piso
+    if (zonaOcupadaPorEdificio(posY, alto) == true){
+        return;
+    }
 
     ObstaculoEstatico *edificio = new ObstaculoEstatico(posX, posY, alto, variante, nivelJuego);
     agregarObstaculo(edificio);
@@ -818,7 +821,7 @@ void PantallaJuego::revisarColisiones(){
 void PantallaJuego::revisarRescates(){
     qreal helicX = helicoptero->x();
     qreal helicY = helicoptero->y();
-    const qreal DISTANCIA_RESCATE = 35.0;
+    const qreal DISTANCIA_RESCATE = 30.0;
     const qreal VELOCIDAD_MAXIMA_RESCATE = 4.0; // si baja mas rapido que esto sobre un civil, lo aplasta
 
     QRectF rectHelicoptero = helicoptero->sceneBoundingRect();

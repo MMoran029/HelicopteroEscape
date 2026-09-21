@@ -6,7 +6,7 @@ public:
     Nivel3(QWidget *parent = nullptr);
 
 protected:
-
+    bool usaEstructuraBloqueadora() const override;
     bool jugadorTieneArmas() const override;
     double probabilidadEnemigoArmado() const override;
     void obtenerFuerzaEmpuje(qreal &fuerzaX, qreal &fuerzaY) const override;
