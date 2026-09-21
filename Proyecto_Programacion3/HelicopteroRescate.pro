@@ -6,6 +6,7 @@ TARGET = HelicopteroRescate
 TEMPLATE = app
 
 SOURCES += \
+    barrahud.cpp \
     bidon.cpp \
     civil.cpp \
     crearboton.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
     pantallaranking.cpp
 
 HEADERS += \
+    barrahud.h \
     bidon.h \
     civil.h \
     crearboton.h \
@@ -52,3 +54,7 @@ HEADERS += \
 
 RESOURCES += \
     recursos.qrc \
+    recursos.qrc \
+
+DISTFILES += \
+    Inicio_sesion.png

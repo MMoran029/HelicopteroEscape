@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "gestorusuarios.h"
 #include <QApplication>
+#include <QTimer>
 #include <iostream>
 using namespace std;
 
@@ -121,6 +122,7 @@ void MainWindow::sesionIniciada(const QString &nombreUsuario){
 void MainWindow::irAJuego(){
     pantallaJuego->reiniciarNivel();
     stack->setCurrentIndex(INDICE_JUEGO);
+    QTimer::singleShot(0, pantallaJuego, &PantallaJuego::ajustarVista);
     pantallaJuego->setFocus();
 }
 
@@ -165,18 +167,21 @@ void MainWindow::mision1Elegida(){
     // La Mision 1 es el nivel del helicoptero que ya esta implementado.
     pantallaJuego->reiniciarNivel();
     stack->setCurrentIndex(INDICE_JUEGO);
+    QTimer::singleShot(0, pantallaJuego, &PantallaJuego::ajustarVista);
     pantallaJuego->setFocus();
 }
 
 void MainWindow::mision2Elegida(){
     pantallaNivel2->reiniciarNivel();
     stack->setCurrentIndex(INDICE_NIVEL2);
+    QTimer::singleShot(0, pantallaNivel2, &PantallaJuego::ajustarVista);
     pantallaNivel2->setFocus();
 }
 
 void MainWindow::mision3Elegida(){
     pantallaNivel3->reiniciarNivel();
     stack->setCurrentIndex(INDICE_NIVEL3);
+    QTimer::singleShot(0, pantallaNivel3, &PantallaJuego::ajustarVista);
     pantallaNivel3->setFocus();
 }
 
@@ -185,6 +190,7 @@ void MainWindow::siguienteNivelSolicitado(){
         // Se completo el Nivel 1: se pasa al Nivel 2.
         pantallaNivel2->reiniciarNivel();
         stack->setCurrentIndex(INDICE_NIVEL2);
+        QTimer::singleShot(0, pantallaNivel2, &PantallaJuego::ajustarVista);
         pantallaNivel2->setFocus();
         return;
     }
@@ -193,6 +199,7 @@ void MainWindow::siguienteNivelSolicitado(){
         // Se completo el Nivel 2: se pasa al Nivel 3.
         pantallaNivel3->reiniciarNivel();
         stack->setCurrentIndex(INDICE_NIVEL3);
+        QTimer::singleShot(0, pantallaNivel3, &PantallaJuego::ajustarVista);
         pantallaNivel3->setFocus();
         return;
     }

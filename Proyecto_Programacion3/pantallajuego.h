@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QResizeEvent>
+#include <QShowEvent>
 #include <QLabel>
 #include "helicoptero.h"
 #include "obstaculo.h"
@@ -16,6 +17,7 @@
 #include "disparo.h"
 #include "estructurabloqueadora.h"
 #include "panelresultado.h"
+#include "barrahud.h"
 
 class QGraphicsPixmapItem;
 
@@ -46,10 +48,17 @@ public:
     int puntajeActual() const { return puntos; }
     int numeroNivel() const { return nivelJuego; }
 
+    // Reajusta la escala de la vista a la escena logica de 800x500.
+    // Es publico para que MainWindow pueda invocarlo (de forma
+    // diferida) justo despues de navegar a esta pantalla con el
+    // QStackedWidget, cuando el layout ya asento el tamano real.
+    void ajustarVista();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 signals:
     // El panel de resultado dispara estos botones; PantallaJuego los
@@ -114,7 +123,8 @@ private:
     QGraphicsPixmapItem *fondo1;
     QGraphicsPixmapItem *fondo2;
     QLabel *hud;
-    QLabel *hudCombustible;
+    BarraHUD *barraProgreso;
+    BarraHUD *barraCombustible;
     PanelResultado *panelResultado;
 
     static const int ANCHO_ESCENA = 800;
@@ -189,7 +199,7 @@ private:
 
     void configurarEscena();
     void configurarHUD();
-    void configurarHUDCombustible();
+    void configurarBarrasHUD();
     void configurarPanelResultado();
 
     void generarEdificio();
@@ -236,7 +246,7 @@ private:
     void revisarColisionesDisparos();
     void revisarColisionEstructura();
     void actualizarHUD();
-    void actualizarHUDCombustible();
+    void actualizarBarrasHUD();
 
     void finalizarJuego(EstadoJuego resultado);
     void limpiarNivel();

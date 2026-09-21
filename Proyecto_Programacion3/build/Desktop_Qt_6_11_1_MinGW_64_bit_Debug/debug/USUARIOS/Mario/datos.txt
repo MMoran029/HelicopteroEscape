@@ -1,6 +1,6 @@
 nombre=Mario
 contrasena=1234
-mejorPuntajeNivel1=1000
-mejorPuntajeNivel2=0
-mejorPuntajeNivel3=0
+mejorPuntajeNivel1=1400
+mejorPuntajeNivel2=950
+mejorPuntajeNivel3=275
 mejorPuntaje=0

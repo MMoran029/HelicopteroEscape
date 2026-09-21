@@ -30,7 +30,7 @@ PantallaJuego::PantallaJuego(QWidget *parent, int nivelJuego) : QWidget(parent),
 
     configurarEscena();
     configurarHUD();
-    configurarHUDCombustible();
+    configurarBarrasHUD();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -62,6 +62,10 @@ void PantallaJuego::configurarEscena(){
     vista->setRenderHint(QPainter::SmoothPixmapTransform);
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    vista->setAlignment(Qt::AlignCenter);
+    vista->setFrameShape(QFrame::NoFrame);
+    vista->setBackgroundBrush(QBrush(Qt::black));
+    vista->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     escena->setItemIndexMethod(QGraphicsScene::NoIndex);
     vista->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     // Franja de piso: dos copias encadenadas para simular scroll
@@ -99,6 +103,10 @@ void PantallaJuego::configurarEscena(){
     helicoptero = new Helicoptero();
     helicoptero->setPos(100, ALTO_ESCENA / 2);
     escena->addItem(helicoptero);
+    // Sin ajustarVista() aqui a proposito: la vista aun no tiene
+    // tamano real (esta fuera del layout / oculta en el QStackedWidget)
+    // y un fitInView con viewport de 0 dejaria una escala diminuta.
+    // El ajuste se hace en showEvent y en resizeEvent (diferidos).
 }
 
 void PantallaJuego::actualizarSpriteJugador(){
@@ -112,16 +120,33 @@ void PantallaJuego::configurarHUD(){
     actualizarHUD();
 }
 
-void PantallaJuego::configurarHUDCombustible(){
-    // Etiqueta flotante en la esquina superior derecha, separada del
-    // HUD de estadisticas, para que el combustible resalte a simple
-    // vista como en un tablero de instrumentos.
-    hudCombustible = new QLabel(this);
-    hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(240,210,80);"
-                                  "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
-    hudCombustible->setAlignment(Qt::AlignCenter);
-    actualizarHUDCombustible();
-    hudCombustible->raise();
+void PantallaJuego::configurarBarrasHUD(){
+    // Barras flotantes sobre la vista: progreso arriba a la izquierda
+    // y combustible arriba a la derecha. Son hijas de PantallaJuego
+    // (heredadas por Nivel2/Nivel3) y se re-anclan en resizeEvent.
+    barraProgreso = new BarraHUD("PROGRESO", QColor(40, 180, 60), this);
+    barraProgreso->setFixedSize(300, 24);
+    barraProgreso->raise();
+
+    barraCombustible = new BarraHUD("COMBUSTIBLE", QColor(230, 170, 30), this);
+    barraCombustible->setFixedSize(210, 22);
+    barraCombustible->raise();
+
+    actualizarBarrasHUD();
+}
+
+void PantallaJuego::ajustarVista(){
+    if (vista == nullptr || escena == nullptr) {
+        return;
+    }
+    // El layout aun puede no haberle dado tamano a la vista (pagina
+    // oculta del QStackedWidget o resize en curso): sin viewport valido
+    // no se toca la transformacion para no dejarla diminuta.
+    if (vista->viewport() == nullptr || vista->viewport()->width() <= 0 ||
+        vista->viewport()->height() <= 0) {
+        return;
+    }
+    vista->fitInView(escena->sceneRect(), Qt::KeepAspectRatio);
 }
 
 void PantallaJuego::configurarPanelResultado(){
@@ -136,15 +161,33 @@ void PantallaJuego::configurarPanelResultado(){
 
 void PantallaJuego::resizeEvent(QResizeEvent *event){
     QWidget::resizeEvent(event);
+    // Diferido: cuando llega el resizeEvent del padre, el layout aun
+    // no reacomodo la vista, asi que el fitInView inmediato usaria el
+    // tamano viejo del viewport (ese era el fallo de "se ve diminuta
+    // hasta minimizar/maximizar"). El singleShot(0) corre despues de
+    // que el layout asento el tamano real.
+    QTimer::singleShot(0, this, &PantallaJuego::ajustarVista);
     if (panelResultado != nullptr) {
         panelResultado->setGeometry(rect());
     }
-    if (hudCombustible != nullptr) {
-        hudCombustible->adjustSize();
-        int margen = 10;
-        hudCombustible->move(width() - hudCombustible->width() - margen, margen + 26);
-        hudCombustible->raise();
+    int margen = 10;
+    int baseY = hud->height() + margen;
+    if (barraProgreso != nullptr) {
+        barraProgreso->move(margen, baseY);
+        barraProgreso->raise();
     }
+    if (barraCombustible != nullptr) {
+        barraCombustible->move(width() - barraCombustible->width() - margen, baseY);
+        barraCombustible->raise();
+    }
+}
+
+void PantallaJuego::showEvent(QShowEvent *event){
+    QWidget::showEvent(event);
+    // Al volver visible la pagina en el QStackedWidget, el layout
+    // necesita un ciclo de eventos para darle su tamano final a la
+    // vista: el ajuste diferido usa ese tamano real en vez del 0 inicial.
+    QTimer::singleShot(0, this, &PantallaJuego::ajustarVista);
 }
 
 // ---------------------------------------------------------------
@@ -833,29 +876,24 @@ void PantallaJuego::revisarColisionEstructura(){
 }
 
 void PantallaJuego::actualizarHUD(){
-    int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
-    QString texto = QString("Vidas: %1   |   Rescatados: %2   |   Perdidos: %3   |   Progreso: %4%   |   Puntos: %5")
+    QString texto = QString("NIVEL: %1   |   Vidas: %2   |   Rescatados: %3   |   Perdidos: %4   |   Puntos: %5")
+                        .arg(nivelJuego)
                         .arg(vidas)
                         .arg(civilesRescatados)
                         .arg(civilesPerdidos)
-                        .arg(progreso)
                         .arg(puntos);
     hud->setText(texto);
 }
 
-void PantallaJuego::actualizarHUDCombustible(){
-    int porcentaje = static_cast<int>(combustible);
-    QString texto = QString("Combustible: %1%").arg(porcentaje);
-    hudCombustible->setText(texto);
-
-    if(porcentaje <= 20){
-        hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(230,80,80);"
-                                      "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
-    } else {
-        hudCombustible->setStyleSheet("background-color: rgba(20,20,20,200); color: rgb(240,210,80);"
-                                      "padding: 4px 8px; font-weight: bold; border-radius: 4px;");
+void PantallaJuego::actualizarBarrasHUD(){
+    int progreso = static_cast<int>(qMin(100.0, (distanciaRecorrida / distanciaMeta) * 100.0));
+    int porcentajeCombustible = static_cast<int>(combustible);
+    if (barraProgreso != nullptr) {
+        barraProgreso->setValor(progreso);
     }
-    hudCombustible->adjustSize();
+    if (barraCombustible != nullptr) {
+        barraCombustible->setValor(porcentajeCombustible);
+    }
 }
 
 int PantallaJuego::obtenerIntervaloBidon() const{
@@ -926,7 +964,7 @@ void PantallaJuego::reiniciarNivel(){
     juegoIniciado = false;
 
     actualizarHUD();
-    actualizarHUDCombustible();
+    actualizarBarrasHUD();
     timerJuego->start(16);
 }
 
@@ -1053,13 +1091,19 @@ void PantallaJuego::actualizarJuego(){
     }
 
     actualizarHUD();
-    actualizarHUDCombustible();
+    actualizarBarrasHUD();
 }
 
 void PantallaJuego::keyPressEvent(QKeyEvent *event){
     if (estado != EstadoJuego::Jugando) {
         if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-            reiniciarNivel();
+            if (panelResultado != nullptr && panelResultado->isVisible()) {
+                if (estado == EstadoJuego::Victoria) {
+                    emit solicitaSiguienteNivel();
+                } else {
+                    reiniciarNivel();
+                }
+            }
         }
         return;
     }
